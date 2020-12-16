@@ -28,6 +28,7 @@ type Client struct {
 	// Buffer for outgoing messages
 	send chan []byte
 
+	name string
 	lobby *Lobby
 }
 
@@ -53,6 +54,9 @@ func (c *Client) readPump(lobbies map[string]*Lobby) {
 	})
 
 	for {
+
+		// Read the incoming messages
+
 		_, bytes, err := c.conn.ReadMessage()
 		if err != nil {
 			// The connection is dead
@@ -64,8 +68,10 @@ func (c *Client) readPump(lobbies map[string]*Lobby) {
 
 		message := string(bytes)
 
+		// If this client is in a lobby, let the lobby handle the message
+
 		if c.lobby != nil {
-			c.lobby.readFromClient(message)
+			c.lobby.readFromClient(c, message)
 			continue
 		}
 
@@ -73,24 +79,13 @@ func (c *Client) readPump(lobbies map[string]*Lobby) {
 
 		fields := strings.Fields(message)
 
-		if fields[0] == "join_lobby" && len(fields) == 2 {
+		if len(fields) == 3 && fields[0] == "join_lobby" {
 			lobby_name := fields[1]
+			player_name := fields[2]
 
 			// Length is already limited by SetReadLimit, so we're not worried
 
-			var lobby *Lobby
-
-			if lobbies[lobby_name] == nil {
-				// Create the lobby, and start its goroutine
-				lobby = newLobby(lobby_name)
-				lobbies[lobby_name] = lobby
-				go lobby.run(lobbies)
-			} else {
-				lobby = lobbies[lobby_name]
-			}
-
-			lobby.register <- c
-			c.lobby = lobby
+			c.joinToLobby(lobby_name, player_name, lobbies)
 		}
 	}
 }
