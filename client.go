@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 	"log"
+	"strings"
 
 	"github.com/gorilla/websocket"
 )
@@ -26,9 +27,11 @@ type Client struct {
 
 	// Buffer for outgoing messages
 	send chan []byte
+
+	lobby *Lobby
 }
 
-func (c *Client) readPump() {
+func (c *Client) readPump(lobbies map[string]*Lobby) {
 	// Sets up a client, reads incoming messages and sends them to the right place
 	//
 	// This is called as a goroutine for each client, and this function
@@ -37,6 +40,9 @@ func (c *Client) readPump() {
 	defer func() {
 		// Clean up
 		c.conn.Close()
+		if c.lobby != nil {
+			c.lobby.unregister <- c
+		}
 	}()
 
 	c.conn.SetReadLimit(maxMessageSize)
@@ -47,19 +53,44 @@ func (c *Client) readPump() {
 	})
 
 	for {
-		_, message, err := c.conn.ReadMessage()
+		_, bytes, err := c.conn.ReadMessage()
 		if err != nil {
 			// The connection is dead
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("err: %v", err)
 			}
-			log.Println("goodbye!")
 			break
 		}
-		select {
-		case c.send <- message:
-		default:
-			close(c.send)
+
+		message := string(bytes)
+
+		if c.lobby != nil {
+			c.lobby.readFromClient(message)
+			continue
+		}
+
+		// The client is not currently in a lobby; check if they're trying to join
+
+		fields := strings.Fields(message)
+
+		if fields[0] == "join_lobby" && len(fields) == 2 {
+			lobby_name := fields[1]
+
+			// Length is already limited by SetReadLimit, so we're not worried
+
+			var lobby *Lobby
+
+			if lobbies[lobby_name] == nil {
+				// Create the lobby, and start its goroutine
+				lobby = newLobby(lobby_name)
+				lobbies[lobby_name] = lobby
+				go lobby.run(lobbies)
+			} else {
+				lobby = lobbies[lobby_name]
+			}
+
+			lobby.register <- c
+			c.lobby = lobby
 		}
 	}
 }

@@ -13,12 +13,17 @@ var addr = flag.String("l", ":8080", "http service address")
 func main() {
 	flag.Parse()
 
-	// Serve the client
+	// Create a global list of lobbies
+	lobbies := make(map[string]*Lobby)
+
+	// Serve the client-side software
 	fs := http.FileServer(http.Dir("public_html"))
 	http.Handle("/", fs)
 
 	// Handle incoming websocket connections
-	http.HandleFunc("/ws", handleConnections)
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		handleConnections(w, r, lobbies)
+	})
 
 	// Start the server
 	log.Println("Now listening on", *addr)
@@ -31,7 +36,7 @@ var upgrader = websocket.Upgrader{
 }
 
 // Upgrade incoming connections to websockets
-func handleConnections(w http.ResponseWriter, r *http.Request) {
+func handleConnections(w http.ResponseWriter, r *http.Request, lobbies map[string]*Lobby) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
@@ -42,6 +47,6 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 	client := &Client{conn: conn, send: make(chan []byte, 256)}
 
 	// Hand the client off to these goroutines which will handle all i/o
-	go client.readPump()
+	go client.readPump(lobbies)
 	go client.writePump()
 }
