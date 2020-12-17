@@ -5,11 +5,6 @@ import (
 	"strings"
 )
 
-type ChatMessage struct {
-	sender *Client
-	msg string
-}
-
 type Lobby struct {
 	name string
 
@@ -18,17 +13,21 @@ type Lobby struct {
 	register chan *Client
 	unregister chan *Client
 
-	// Chat
-	chat chan *ChatMessage
+	// Broadcast
+	bcast chan string
 }
 
 func newLobby(name string) *Lobby {
 	return &Lobby{
 		name: name,
 		clients: make(map[*Client]bool),
-		register: make(chan *Client),
-		unregister: make(chan *Client),
-		chat: make(chan *ChatMessage),
+
+		// We make channels with a small buffer, in case we need to
+		// write to them from their own goroutine for convenience
+
+		register: make(chan *Client, 2),
+		unregister: make(chan *Client, 2),
+		bcast: make(chan string, 2),
 	}
 }
 
@@ -40,6 +39,9 @@ func (l *Lobby) run(lobbies map[string]*Lobby) {
 
 		case client := <-l.register:
 			l.clients[client] = true
+
+			// Announce the join
+			l.bcast <- "joins "+client.name
 
 		case client := <-l.unregister:
 			if _, ok := l.clients[client]; ok {
@@ -53,8 +55,9 @@ func (l *Lobby) run(lobbies map[string]*Lobby) {
 				return
 			}
 
-		case msg := <-l.chat:
-			text := "chat " + msg.sender.name + " " + msg.msg
+			l.bcast <- "parts "+client.name
+
+		case text := <-l.bcast:
 			bytes := []byte(text)
 
 			for client := range l.clients {
@@ -104,7 +107,7 @@ func (l *Lobby) readFromClient(c *Client, msg string) {
 	fields := strings.Fields(msg)
 
 	if fields[0] == "chat" {
-		l.chat <- &ChatMessage{msg: msg[5:], sender: c}
+		l.bcast <- "chat "+c.name+" "+msg[5:]
 		return
 	}
 
