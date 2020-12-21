@@ -3,6 +3,7 @@
 	<head>
 		<meta charset="utf-8" />
 		<title>Detonating Cats</title>
+		<link rel="stylesheet" type="text/css" href="style.css" />
 	</head>
 	<body>
 		<noscript><h1>You need to enable Javascript</h1></noscript>
@@ -11,7 +12,8 @@
 			<p>Loading assets, please wait.</p>
 			<p><span id="loading-assets">0</span> assets loaded.</p>
 		</div>
-		<div id="welcome" style="display:none">
+
+		<div id="welcome" class="reveal">
 			<p>Welcome to DETONATING CATS</p>
 			<table>
 				<tr>
@@ -26,7 +28,41 @@
 			<br />
 			<button id="welcome-join">Join!</button>
 		</div>
+
+		<div id="game-view" class="reveal">
+			<div id="board">
+				<div id="top-bar">
+					<span class="left-text shade">
+						DETONATING CATS
+					</span>
+					<span class="right-text shade">
+						<span id="player-name"></span>@<span id="lobby-name"></span>
+					</span>
+				</div>
+
+				<div id="discard-pile">
+					<img class="card" src="assets/card_back.png" />
+				</div>
+				<div id="draw-pile">
+					<img class="card" src="assets/card_back.png" />
+				</div>
+
+				<div id="card-deck">
+					<img class="card" src="assets/card_back.png" />
+					<img class="card" src="assets/card_back.png" />
+					<img class="card" src="assets/card_back.png" />
+					<img class="card" src="assets/card_back.png" />
+					<img class="card" src="assets/card_back.png" />
+					<img class="card" src="assets/card_back.png" />
+					<img class="card" src="assets/card_back.png" />
+					<img class="card" src="assets/card_back.png" />
+				</div>
+			</div> <!-- /board -->
+		</div> <!-- /game-view -->
+
 		<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" type="text/javascript"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-mousewheel/3.1.13/jquery.mousewheel.min.js" type="text/javascript"></script>
+
 		<script src="game.js" type="text/javascript"></script>
 		<script src="strings.js" type="text/javascript"></script>
 		<script src="init.js" type="text/javascript"></script>

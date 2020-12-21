@@ -1,0 +1,102 @@
+* {
+	margin: 0;
+	font-family: sans-serif;
+}
+
+div.reveal {
+	display: none;
+}
+
+div#loading, div#welcome {
+	margin: 10px;
+}
+div#welcome > p {
+	margin-bottom: 10px;
+}
+
+html, body {
+	height: 100%;
+}
+
+div#game-view {
+	height: 100%;
+	width: 100%;
+	background-color: black;
+	position: absolute;
+}
+
+div#board {
+	background-image: url("assets/wood.jpg");
+	width: 800px;
+	height: 800px;
+	border: 1px solid #9c3500;
+	position: absolute;
+	top: 20px;
+	left: 20px;
+}
+
+.shade {
+	background-color: rgba(255, 255, 255, 0.5);
+	padding: 2px;
+}
+
+span.left-text {
+	float: left;
+}
+span.right-text {
+	float: right;
+}
+
+.card {
+	height: 250px;
+	border-radius: 10px;
+	border: 5px solid white;
+}
+
+#discard-pile, #draw-pile {
+	position: absolute;
+	top: 150px;
+	transition: 0.3s top, 0.3s left, 0.3s right;
+}
+#discard-pile {
+	left: 125px;
+}
+#discard-pile:hover {
+	left: 120px;
+}
+#draw-pile {
+	right: 125px;
+}
+#draw-pile:hover {
+	right: 120px;
+}
+#draw-pile .card:hover, #discard-pile .card:hover {
+	height: 260px;
+}
+#draw-pile .card, #discard-pile .card {
+	transition: 0.3s height;
+	display: block; /* To prevent trailing whitespace */
+}
+#draw-pile:hover, #discard-pile:hover {
+	top: 145px;
+}
+
+#card-deck {
+	overflow: auto;
+	white-space: nowrap;
+	background-color: rgba(255, 255, 255, 0);
+	position: absolute;
+	bottom: 0px;
+	width: 100%;
+}
+#card-deck .card {
+	height: 150px;
+	border-radius: 7px;
+	border: 3px solid white;
+	transition: 0.3s height;
+}
+#card-deck .card:hover {
+	height: 250px;
+	border-radius: 10px;
+	border: 5px solid white;
+}

@@ -10,7 +10,7 @@
 		
 		// Load assets
 		// TODO: audio assets
-		var imageAssets = ["wood.jpg"];
+		var imageAssets = ["wood.jpg", "card_back.png"];
 		var promises = [];
 		var assetsLoaded = 0;
 
@@ -42,8 +42,8 @@
 
 		$("#welcome-join").bind("click touchstart", joinGame);
 
-		$("#loading").css("display", "none");
-		$("#welcome").css("display", "block");
+		$("#loading").toggleClass("reveal");
+		$("#welcome").toggleClass("reveal");
 	}
 
 	function joinGame() {
@@ -59,6 +59,10 @@
 
 		if (user.includes(" ")) {
 			alert(strings["one_word"]);
+			return;
+		}
+		if (lobby.includes(" ")) {
+			alert(strings["lobby_one_word"]);
 			return;
 		}
 
@@ -84,7 +88,7 @@
 				gameState.name = user;
 				gameState.lobby = lobby;
 
-				startGame(gameState);
+				gameState.start();
 
 				return;
 			}
