@@ -14,11 +14,13 @@ type Lobby struct {
 	unregister chan *Client
 
 	// Broadcast
-	bcast chan string
+	bcast chan []byte
+
+	currentGame *Game
 }
 
-func newLobby(name string) *Lobby {
-	return &Lobby{
+func newLobby(name string) (lobby *Lobby) {
+	lobby = &Lobby{
 		name: name,
 		clients: make(map[*Client]bool),
 
@@ -27,8 +29,10 @@ func newLobby(name string) *Lobby {
 
 		register: make(chan *Client, 2),
 		unregister: make(chan *Client, 2),
-		bcast: make(chan string, 2),
+		bcast: make(chan []byte, 2),
 	}
+	lobby.currentGame = newGame(lobby)
+	return
 }
 
 func (l *Lobby) run(lobbies map[string]*Lobby) {
@@ -41,7 +45,13 @@ func (l *Lobby) run(lobbies map[string]*Lobby) {
 			l.clients[client] = true
 
 			// Announce the join
-			l.bcast <- "joins "+client.name
+			l.sendBcast("joins "+client.name)
+
+			// Sync the join to the game object
+			l.currentGame.addPlayer(client)
+
+			// Sync the game state to the new client
+			l.currentGame.netburst(client)
 
 		case client := <-l.unregister:
 			if _, ok := l.clients[client]; ok {
@@ -55,11 +65,11 @@ func (l *Lobby) run(lobbies map[string]*Lobby) {
 				return
 			}
 
-			l.bcast <- "parts "+client.name
+			// Announce and sync
+			l.sendBcast("parts "+client.name)
+			l.currentGame.removePlayer(client)
 
-		case text := <-l.bcast:
-			bytes := []byte(text)
-
+		case bytes := <-l.bcast:
 			for client := range l.clients {
 				select {
 				case client.send <- bytes:
@@ -106,10 +116,21 @@ func (c *Client) joinToLobby(lobby_name string, player_name string, lobbies map[
 func (l *Lobby) readFromClient(c *Client, msg string) {
 	fields := strings.Fields(msg)
 
+	// Lobby-wide commands
+
 	if fields[0] == "chat" {
-		l.bcast <- "chat "+c.name+" "+msg[5:]
+		l.sendBcast("chat "+c.name+" "+msg[5:])
 		return
 	}
 
-	log.Println("Uncaught message from", c.name + ":", msg)
+	// Nothing to be done here, hand the message off to the game object
+	l.currentGame.readFromClient(c, msg)
+}
+
+func (l *Lobby) sendBcast(msg string) {
+	select {
+	case l.bcast <- []byte(msg):
+	default:
+		log.Fatal("failed to broadcast message", msg)
+	}
 }

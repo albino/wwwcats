@@ -119,12 +119,14 @@ func (c *Client) writePump() {
 			}
 			w.Write(message)
 
+			/*
 			// Finish writing whatever is left
 			n := len(c.send)
 			for i := 0; i < n; i++ {
-				w.Write([]byte{'\n'})
+				w.Write([]byte("\r\n"))
 				w.Write(<-c.send)
 			}
+			*/
 
 			if err := w.Close(); err != nil {
 				return
@@ -136,5 +138,13 @@ func (c *Client) writePump() {
 				return
 			}
 		}
+	}
+}
+
+func (c *Client) sendMsg (message string) {
+	select {
+	case c.send <- []byte(message):
+	default:
+		log.Fatal("Failed to write to client", c.name)
 	}
 }
