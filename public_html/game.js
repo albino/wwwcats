@@ -29,7 +29,7 @@ var GameState = function() {
 		});
 
 		// We're ready to bring the game board into view
-
+		$("body").css("background-color", "black");
 		$("#welcome").toggleClass("reveal");
 		$("#game-view").toggleClass("reveal");
 	}

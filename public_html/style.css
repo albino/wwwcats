@@ -21,7 +21,6 @@ html, body {
 div#game-view {
 	height: 100%;
 	width: 100%;
-	background-color: black;
 	position: absolute;
 }
 
@@ -99,4 +98,43 @@ span.right-text {
 	height: 250px;
 	border-radius: 10px;
 	border: 5px solid white;
+}
+
+div#sidebar {
+	position: absolute;
+	top: 20px;
+	left: 840px;
+	color: white;
+	width: 250px;
+	height: 800px;
+	display: flex;
+	flex-direction: column;
+}
+
+div.sidebar-box {
+	padding: 5px;
+	border: 1px solid white;
+	margin-bottom: 10px;
+}
+div.sidebar-box:last-child {
+	margin-bottom: 0;
+}
+
+div#game-log {
+	overflow: scroll;
+	overflow-x: hidden;
+	flex: 1 1 auto;
+}
+div#game-log-container {
+	flex: 1 1 auto;
+	display: flex;
+	flex-direction: column;
+}
+
+div#chat-container {
+	display: flex;
+	flex-direction: row;
+}
+input#chat-message {
+	flex: 1 1 auto;
 }
