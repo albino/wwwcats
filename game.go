@@ -3,6 +3,8 @@ package main
 import (
 	"strings"
 	"log"
+	"math/rand"
+	"time"
 )
 
 type Game struct {
@@ -18,12 +20,16 @@ type Game struct {
 	// It's easier if we index the spectators, so we use a map
 	// Only synced with the client during netburst
 	spectators map[*Client]bool
+
+	deck *Deck
+	hands map[*Client]*Hand
 }
 
 func newGame(lobby *Lobby) *Game {
 	return &Game {
 		lobby: lobby,
 		spectators: make(map[*Client]bool),
+		hands: make(map[*Client]*Hand),
 	}
 }
 
@@ -93,6 +99,7 @@ func (g *Game) netburst(client *Client) {
 	client.sendMsg("players" + g.playerList())
 
 	// Display a message to tell the client they are spectating
+	// TODO: a different message if the game has already started
 	client.sendMsg("message spectating");
 }
 
@@ -163,7 +170,34 @@ func (g *Game) readFromClient(c *Client, msg string) {
 func (g *Game) start() {
 	// Starts the game
 
-	g.lobby.sendBcast("clear_message");
+	// TODO: maximum no of players
 
 	g.started = true
+
+	g.lobby.sendBcast("clear_message");
+	g.lobby.sendBcast("bcast starting");
+
+	// Shuffle the player list and re-send it
+	rand.Seed(time.Now().UnixNano()) // Hard enough to predict; should be fine
+	rand.Shuffle(len(g.players), func (i, j int) {
+		g.players[i], g.players[j] = g.players[j], g.players[i]
+	})
+	g.lobby.sendBcast("players" + g.playerList())
+
+	// Generate the deck
+	g.deck = newDeck()
+
+	// Give each player a hand
+	for _, player := range g.players {
+		g.hands[player] = g.deck.dealHand()
+	}
+
+	// Shuffle in extra cards
+	g.deck.addExtraCards(len(g.players))
+
+	// Sync the cards to the client
+	for _, player := range g.players {
+		player.sendMsg("hand" + g.hands[player].cardList())
+	}
+	g.lobby.sendBcast("draw_pile yes")
 }

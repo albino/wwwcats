@@ -186,6 +186,31 @@ var GameState = function() {
 			return;
 		}
 
+		if (parts[0] == "bcast") {
+			let msg = strings["bcast_"+ev.data.substring(6)];
+			this.console(msg);
+
+			return;
+		}
+
+		if (parts[0] == "hand") {
+			for (var i=1; i < parts.length; i++) {
+				$("#card-deck").append("<img class='card' src='assets/card_"+parts[i]+".png' /> ");
+				// NB trailing whitespace hack
+			}
+
+			return;
+		}
+
+		if (ev.data == "draw_pile yes") {
+			$("#draw-pile").html("<img class='card' src='assets/card_back.png' />");
+			return;
+		}
+		if (ev.data == "draw_pile no") {
+			$("#draw-pile").html("");
+			return;
+		}
+
 		console.warn("WARN: received unknown data from server: "+ev.data);
 	}
 

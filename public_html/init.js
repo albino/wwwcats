@@ -10,7 +10,23 @@
 		
 		// Load assets
 		// TODO: audio assets
-		var imageAssets = ["wood.jpg", "card_back.png"];
+		var imageAssets = [
+			"wood.jpg",
+			"card_back.png",
+			"card_defuse.png",
+			"card_exploding.png",
+			"card_nope.png",
+			"card_skip.png",
+			"card_attack.png",
+			"card_see3.png",
+			"card_favour.png",
+			"card_shuffle.png",
+			"card_random1.png",
+			"card_random2.png",
+			"card_random3.png",
+			"card_random4.png",
+			"card_random5.png"
+		];
 		var promises = [];
 		var assetsLoaded = 0;
 

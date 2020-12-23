@@ -5,4 +5,5 @@ var strings = {
 	"lobby_one_word": "Lobby names can only be one word.",
 	"message_spectating": "You are currently spectating; to join, type <b>/join</b>.",
 	"message_playing": "Type <b>/start</b> to start the game, or <b>/leave</b> to spectate.",
+	"bcast_starting": "<span style='color:yellow'>The game is starting!</span>"
 };
