@@ -151,8 +151,8 @@ func (g *Game) readFromClient(c *Client, msg string) {
 	if fields[0] == "leave" {
 		// Leaving the game (back to spectators)
 
-		n := g.playerNumber(c)
-		if n == -1 {
+		_, ok := g.spectators[c]
+		if ok {
 			// Player is a spectator!
 			return
 		}
@@ -175,6 +175,11 @@ func (g *Game) readFromClient(c *Client, msg string) {
 	}
 
 	if fields[0] == "draw" {
+		_, ok := g.spectators[c]
+		if ok {
+			return
+		}
+
 		if g.deck.cardsLeft() < 1 {
 			c.sendMsg("err illegal_move")
 			return
