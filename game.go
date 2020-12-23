@@ -99,8 +99,9 @@ func (g *Game) netburst(client *Client) {
 	client.sendMsg("players" + g.playerList())
 
 	// Display a message to tell the client they are spectating
-	// TODO: a different message if the game has already started
-	client.sendMsg("message spectating");
+	if !g.started {
+		client.sendMsg("message spectating");
+	}
 }
 
 func (g *Game) spectatorList() (list string) {
