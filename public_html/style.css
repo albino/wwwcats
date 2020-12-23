@@ -121,14 +121,17 @@ div.sidebar-box:last-child {
 }
 
 div#game-log {
-	overflow: scroll;
-	overflow-x: hidden;
-	flex: 1 1 auto;
+	overflow: auto;
+	flex: 1;
+	flex-direction: column;
+	overflow: auto;
 }
 div#game-log-container {
-	flex: 1 1 auto;
+	flex: 1;
 	display: flex;
 	flex-direction: column;
+	min-height: min-content;
+	overflow: auto;
 }
 
 div#chat-container {

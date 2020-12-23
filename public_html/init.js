@@ -54,14 +54,14 @@
 			return;
 		}
 		
-		var lobby = $("#welcome-lobby").val() || $("#welcome-lobby").attr("placeholder");
-		var user  = $("#welcome-username").val() || $("#welcome-username").attr("placeholder");
+		gameState.lobby = $("#welcome-lobby").val() || $("#welcome-lobby").attr("placeholder");
+		gameState.name  = $("#welcome-username").val() || $("#welcome-username").attr("placeholder");
 
-		if (user.includes(" ")) {
+		if (gameState.name.includes(" ")) {
 			alert(strings["one_word"]);
 			return;
 		}
-		if (lobby.includes(" ")) {
+		if (gameState.lobby.includes(" ")) {
 			alert(strings["lobby_one_word"]);
 			return;
 		}
@@ -69,31 +69,14 @@
 		gameState.conn = new WebSocket("ws://" + location.host + "/ws");
 
 		gameState.conn.onopen = function () {
-			gameState.conn.send("join_lobby " + lobby + " " + user);
+			gameState.conn.send("join_lobby " + gameState.lobby + " " + gameState.name);
 		}
 
-		gameState.conn.onmessage = function (e) {
-			var parts = e.data.split(" ");
-
-			if (parts[0] == "err") {
-				alert (strings[parts[1]]);
-				gameState.conn.close();
-				gameState.conn = null;
-				return;
-			}
-
-			if (parts[0] == "joins" && parts[1] == user) {
-				// We're in!
-
-				gameState.name = user;
-				gameState.lobby = lobby;
-
-				gameState.start();
-
-				return;
-			}
-
-			console.warn("WARN: received unknown data from server: "+e.data);
-		}
+		gameState.conn.onmessage = function(ev) {
+			// We wrap this in an anonymous function so that 'this'
+			// will refer to the GameState object and not the WebSocket
+			// (I don't have a clue how javascript OOP works)
+			gameState.readFromServer(ev);
+		};
 	}
 })();

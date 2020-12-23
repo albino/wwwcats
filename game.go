@@ -42,7 +42,7 @@ func (g *Game) removePlayer(client *Client) {
 		g.players = append(g.players[:clientToRemove], g.players[clientToRemove+1:]...)
 
 		// synchronise a new player list with all the clients
-		client.sendMsg("players" + g.playerList())
+		g.lobby.sendBcast("players" + g.playerList())
 
 		// TODO what if the game has started?
 	}
@@ -66,7 +66,7 @@ func (g *Game) upgradePlayer(client *Client) {
 	delete(g.spectators, client)
 	g.players = append(g.players, client)
 
-	g.lobby.sendBcast("upgrade "+client.name)
+	g.lobby.sendBcast("upgrades "+client.name)
 	g.lobby.sendBcast("players" + g.playerList())
 }
 
@@ -75,7 +75,7 @@ func (g *Game) downgradePlayer(client *Client) {
 	g.players = append(g.players[:clientToRemove], g.players[clientToRemove+1:]...)
 	g.spectators[client] = true
 
-	g.lobby.sendBcast("downgrade "+client.name)
+	g.lobby.sendBcast("downgrades "+client.name)
 	g.lobby.sendBcast("players" + g.playerList())
 
 	// TODO what if the game has started?
