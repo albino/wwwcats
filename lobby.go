@@ -27,9 +27,9 @@ func newLobby(name string) (lobby *Lobby) {
 		// We make channels with a small buffer, in case we need to
 		// write to them from their own goroutine for convenience
 
-		register: make(chan *Client, 2),
-		unregister: make(chan *Client, 2),
-		bcast: make(chan []byte, 2),
+		register: make(chan *Client, 64),
+		unregister: make(chan *Client, 64),
+		bcast: make(chan []byte, 64),
 	}
 	lobby.currentGame = newGame(lobby)
 	return
