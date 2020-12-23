@@ -75,7 +75,7 @@ span#message {
 	border: 5px solid white;
 }
 
-#discard-pile, #draw-pile {
+#discard-pile, #draw-pile, #draw-pile-animation {
 	position: absolute;
 	top: 150px;
 	transition: 0.3s top, 0.3s left, 0.3s right;
@@ -95,12 +95,16 @@ span#message {
 #draw-pile .card:hover, #discard-pile .card:hover {
 	height: 260px;
 }
-#draw-pile .card, #discard-pile .card {
+#draw-pile .card, #discard-pile .card, #draw-pile-animation .card {
 	transition: 0.3s height;
 	display: block; /* To prevent trailing whitespace */
 }
 #draw-pile:hover, #discard-pile:hover {
 	top: 145px;
+}
+
+#draw-pile-animation {
+	transition: none;
 }
 
 #card-deck {
@@ -132,6 +136,8 @@ div#sidebar {
 	height: 800px;
 	display: flex;
 	flex-direction: column;
+	background-color: black;
+	z-index: 1;
 }
 
 div.sidebar-box {
@@ -163,4 +169,20 @@ div#chat-container {
 }
 input#chat-message {
 	flex: 1 1 auto;
+}
+
+div#card-hud {
+	z-index: 1;
+	background-color: rgba(0, 0, 0, 0.5);
+	opacity: 0;
+	transition: 0.5s opacity;
+	padding-top: 200px;
+	height: 600px;
+	width: 800px;
+	position: absolute;
+}
+div#card-hud > img.card {
+	margin: auto;
+	height: 400px;
+	display: block;
 }

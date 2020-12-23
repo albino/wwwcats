@@ -227,20 +227,29 @@ var GameState = function() {
 
 			if (parts[1] == this.name) {
 				// it is our go!!
+			} else {
+				// it is no longer our go
 			}
 
 			return;
 		}
 
 		if (parts[0] == "drew") {
-			// TODO: animate
-			this.console("You drew <span style='color:orange'>"+strings["card_"+parts[1]]+".");
+			this.console("You drew <span style='color:orange'>"+strings["card_"+parts[1]]+".</span>");
+
+			// Animation
+			cardHUD(parts[1], 2000);
+
 			return;
 		}
 		if (parts[0] == "drew_other") {
-			// TODO: animate
 			let encoded = entities(parts[1]);
 			this.console("<span style='color:#ccc'>"+encoded+" drew a card.</span>");
+
+			// Animation
+			$("#draw-pile-animation").html("<img src='assets/card_back.png' class='card' />");
+			animate("#draw-pile-animation", "right", 125, -150, -15, "px");
+
 			return;
 		}
 
