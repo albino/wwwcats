@@ -18,6 +18,7 @@ var GameState = function() {
 
 	this.start = function() {
 		// Run the game!
+		// Doesn't actually _start_ the game, but rather starts the game client
 
 		$("#player-name").text(this.name);
 		$("#lobby-name").text(this.lobby);
@@ -164,6 +165,23 @@ var GameState = function() {
 			let encodedName = entities(parts[1]);
 			let encodedMsg = entities(ev.data.substring(parts[1].length + 5));
 			this.console(encodedName+": "+encodedMsg);
+
+			return;
+		}
+
+		if (parts[0] == "message") {
+			// This refers to the 'message' container in the middle of the board
+			// that can be used to display useful game info
+			let msg = strings["message_"+ev.data.substring(8)];
+			$("#message").html(msg);
+			$("#message-container").removeClass("reveal");
+
+			return;
+		}
+
+		if (parts[0] == "clear_message") {
+			$("#message").html("");
+			$("#message-container").addClass("reveal");
 
 			return;
 		}

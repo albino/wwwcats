@@ -68,6 +68,9 @@ func (g *Game) upgradePlayer(client *Client) {
 
 	g.lobby.sendBcast("upgrades "+client.name)
 	g.lobby.sendBcast("players" + g.playerList())
+
+	// Display a message to tell the client they are playing
+	client.sendMsg("message playing");
 }
 
 func (g *Game) downgradePlayer(client *Client) {
@@ -78,6 +81,9 @@ func (g *Game) downgradePlayer(client *Client) {
 	g.lobby.sendBcast("downgrades "+client.name)
 	g.lobby.sendBcast("players" + g.playerList())
 
+	// Display a message to tell the client they are spectating
+	client.sendMsg("message spectating");
+
 	// TODO what if the game has started?
 }
 
@@ -85,6 +91,9 @@ func (g *Game) netburst(client *Client) {
 	// Communicates the current game state to a newly joining client
 	client.sendMsg("spectators" + g.spectatorList())
 	client.sendMsg("players" + g.playerList())
+
+	// Display a message to tell the client they are spectating
+	client.sendMsg("message spectating");
 }
 
 func (g *Game) spectatorList() (list string) {
@@ -135,5 +144,26 @@ func (g *Game) readFromClient(c *Client, msg string) {
 		return
 	}
 
+	if fields[0] == "start" {
+		if g.started {
+			return
+		}
+
+		if len(g.players) < 2 {
+			return
+		}
+
+		g.start()
+		return
+	}
+
 	log.Println("Uncaught message from", c.name + ":", msg)
+}
+
+func (g *Game) start() {
+	// Starts the game
+
+	g.lobby.sendBcast("clear_message");
+
+	g.started = true
 }
