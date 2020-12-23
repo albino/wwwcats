@@ -16,6 +16,7 @@ type Game struct {
 	// The player list is order-sensitive, so we re-sync it
 	// with the client every time it's updated.
 	players []*Client
+	currentPlayer int
 
 	// It's easier if we index the spectators, so we use a map
 	// Only synced with the client during netburst
@@ -30,6 +31,7 @@ func newGame(lobby *Lobby) *Game {
 		lobby: lobby,
 		spectators: make(map[*Client]bool),
 		hands: make(map[*Client]*Hand),
+		currentPlayer: -1,
 	}
 }
 
@@ -101,6 +103,13 @@ func (g *Game) netburst(client *Client) {
 	// Display a message to tell the client they are spectating
 	if !g.started {
 		client.sendMsg("message spectating");
+		return
+	}
+
+	// allow the client to spectate a game-in-progress
+	client.sendMsg("message spectating_started")
+	if g.deck.cardsLeft() > 0 {
+		client.sendMsg("draw_pile yes")
 	}
 }
 
@@ -165,7 +174,47 @@ func (g *Game) readFromClient(c *Client, msg string) {
 		return
 	}
 
+	if fields[0] == "draw" {
+		if g.deck.cardsLeft() < 1 {
+			c.sendMsg("err illegal_move")
+			return
+		}
+
+		if g.players[g.currentPlayer].name != c.name {
+			c.sendMsg("err illegal_move")
+			return
+		}
+
+		g.drawCard(c)
+		return
+	}
+
 	log.Println("Uncaught message from", c.name + ":", msg)
+}
+
+func (g *Game) drawCard(c *Client) {
+	card := g.deck.draw()
+
+	if card == "exploding" {
+		// TODO what if a player explodes?
+	}
+
+	g.hands[c].addCard(card)
+	c.sendMsg("hand" + g.hands[c].cardList())
+	// Tell the player what card they drew
+	c.sendMsg("drew "+card)
+	// Tell everyone else that a mystery card was drawn
+	g.lobby.sendComplexBcast("drew_other "+c.name, map[*Client]bool{c: true})
+
+	// End this player's turn
+	g.currentPlayer++
+	if g.currentPlayer >= len(g.players) {
+		g.currentPlayer = 0
+	}
+	g.lobby.sendBcast("now_playing "+g.players[g.currentPlayer].name)
+	if g.deck.cardsLeft() == 0 {
+		g.lobby.sendBcast("draw_pile no")
+	}
 }
 
 func (g *Game) start() {
@@ -183,7 +232,9 @@ func (g *Game) start() {
 	rand.Shuffle(len(g.players), func (i, j int) {
 		g.players[i], g.players[j] = g.players[j], g.players[i]
 	})
+	g.currentPlayer = 0
 	g.lobby.sendBcast("players" + g.playerList())
+	g.lobby.sendBcast("now_playing "+g.players[g.currentPlayer].name)
 
 	// Generate the deck
 	g.deck = newDeck()

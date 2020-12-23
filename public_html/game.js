@@ -194,6 +194,8 @@ var GameState = function() {
 		}
 
 		if (parts[0] == "hand") {
+			$("#card-deck").empty();
+
 			for (var i=1; i < parts.length; i++) {
 				$("#card-deck").append("<img class='card' src='assets/card_"+parts[i]+".png' /> ");
 				// NB trailing whitespace hack
@@ -208,6 +210,37 @@ var GameState = function() {
 		}
 		if (ev.data == "draw_pile no") {
 			$("#draw-pile").html("");
+			return;
+		}
+
+		if (parts[0] == "now_playing") {
+			let encoded = entities(parts[1]);
+			this.console("<span style='color:yellow'>It is "+encoded+"'s turn.</span>");
+
+			$("#now-playing-mark").remove();
+
+			$("#player-list > li").each( function() {
+				if ($( this ).html() == encoded) {
+					$( this ).append("<span id='now-playing-mark' style='color:red'> *</span>");
+				}
+			} );
+
+			if (parts[1] == this.name) {
+				// it is our go!!
+			}
+
+			return;
+		}
+
+		if (parts[0] == "drew") {
+			// TODO: animate
+			this.console("You drew <span style='color:orange'>"+strings["card_"+parts[1]]+".");
+			return;
+		}
+		if (parts[0] == "drew_other") {
+			// TODO: animate
+			let encoded = entities(parts[1]);
+			this.console("<span style='color:#ccc'>"+encoded+" drew a card.</span>");
 			return;
 		}
 

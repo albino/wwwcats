@@ -81,14 +81,24 @@ func (d *Deck) dealHand() (h *Hand) {
 	return
 }
 
+func (d *Deck) cardsLeft() int {
+	return len(d.cards)
+}
+
 type Hand struct {
 	cards []string
 }
 
 func (h *Hand) cardList() (list string) {
+	// TODO sorting
+
 	for _, card := range h.cards {
 		list = list + " " + card
 	}
 
 	return
+}
+
+func (h *Hand) addCard(card string) {
+	h.cards = append(h.cards, card)
 }
