@@ -41,19 +41,12 @@ func (g *Game) addPlayer(client *Client) {
 
 func (g *Game) removePlayer(client *Client) {
 	_, ok := g.spectators[client]
-	if ok {
-		// Remove the player from the spectators
-		delete(g.spectators, client)
-	} else {
-		// Remove the player from the players
-		clientToRemove := g.playerNumber(client)
-		g.players = append(g.players[:clientToRemove], g.players[clientToRemove+1:]...)
-
-		// synchronise a new player list with all the clients
-		g.lobby.sendBcast("players" + g.playerList())
-
-		// TODO what if the game has started?
+	if !ok {
+		// First downgrade the player to spectator
+		g.downgradePlayer(client)
 	}
+
+	delete(g.spectators, client)
 }
 
 func (g *Game) playerNumber(client *Client) (num int) {
@@ -82,6 +75,11 @@ func (g *Game) upgradePlayer(client *Client) {
 }
 
 func (g *Game) downgradePlayer(client *Client) {
+	currentlyPlaying := false
+	if g.playerNumber(client) == g.currentPlayer {
+		currentlyPlaying = true
+	}
+
 	clientToRemove := g.playerNumber(client)
 	g.players = append(g.players[:clientToRemove], g.players[clientToRemove+1:]...)
 	g.spectators[client] = true
@@ -89,10 +87,20 @@ func (g *Game) downgradePlayer(client *Client) {
 	g.lobby.sendBcast("downgrades "+client.name)
 	g.lobby.sendBcast("players" + g.playerList())
 
-	// Display a message to tell the client they are spectating
-	client.sendMsg("message spectating");
+	if (!g.started) {
+		// Display a message to tell the client they are spectating
+		client.sendMsg("message spectating");
+		return
+	}
 
-	// TODO what if the game has started?
+	// Gracefully remove the player from the game in progress
+	client.sendMsg("message spectating_exploded");
+	// Erase their hand
+	client.sendMsg("hand")
+	// If they are currently playing, advance to the next player
+	if currentlyPlaying {
+		g.nextTurn()
+	}
 }
 
 func (g *Game) netburst(client *Client) {
@@ -201,7 +209,16 @@ func (g *Game) drawCard(c *Client) {
 	card := g.deck.draw()
 
 	if card == "exploding" {
-		// TODO what if a player explodes?
+		g.lobby.sendBcast("exploded "+c.name)
+
+		if !g.hands[c].contains("defuse") {
+			g.downgradePlayer(c)
+			return
+		}
+
+		// TODO defusal
+
+		return
 	}
 
 	g.hands[c].addCard(card)
@@ -211,11 +228,18 @@ func (g *Game) drawCard(c *Client) {
 	// Tell everyone else that a mystery card was drawn
 	g.lobby.sendComplexBcast("drew_other "+c.name, map[*Client]bool{c: true})
 
-	// End this player's turn
 	g.currentPlayer++
+	g.nextTurn()
+}
+
+func (g *Game) nextTurn() {
+	// Begins the next turn
+	// NB. this doesn't change currentPlayer
+
 	if g.currentPlayer >= len(g.players) {
 		g.currentPlayer = 0
 	}
+
 	g.lobby.sendBcast("now_playing "+g.players[g.currentPlayer].name)
 	if g.deck.cardsLeft() == 0 {
 		g.lobby.sendBcast("draw_pile no")

@@ -19,6 +19,7 @@ var strings = {
 	"illegal_move": "Sorry, but the server has disconnected you for moving improperly. This is either a bug or you are trying to cheat.",
 	"message_spectating": "You are currently spectating; to join, type <b>/join</b>.",
 	"message_spectating_started": "You are spectating and can join once this round has finished.",
+	"message_spectating_exploded": "You are out for this round.",
 	"message_playing": "Type <b>/start</b> to start the game, or <b>/leave</b> to spectate.",
 	"bcast_starting": "<span style='color:yellow'>The game is starting!</span>"
 };

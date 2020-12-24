@@ -102,3 +102,12 @@ func (h *Hand) cardList() (list string) {
 func (h *Hand) addCard(card string) {
 	h.cards = append(h.cards, card)
 }
+
+func (h *Hand) contains(wanted string) bool {
+	for _, card := range h.cards {
+		if card == wanted {
+			return true
+		}
+	}
+	return false
+}

@@ -66,6 +66,8 @@ var GameState = function() {
 	}
 
 	this.readFromServer = function(ev) {
+		console.log("<< "+ev.data);
+
 		var parts = ev.data.split(" ");
 
 		if (parts[0] == "err") {
@@ -227,8 +229,15 @@ var GameState = function() {
 
 			if (parts[1] == this.name) {
 				// it is our go!!
+				(function(gameState) {
+					$("#draw-pile").off('click').on('click', function() {
+						console.log("click event fired!");
+						gameState.send("draw");
+					});
+				})(this);
 			} else {
 				// it is no longer our go
+				$("#draw-pile").unbind("click");
 			}
 
 			return;
@@ -253,10 +262,20 @@ var GameState = function() {
 			return;
 		}
 
+		if (parts[0] == "exploded") {
+			let encoded = entities(parts[1]);
+			this.console("<span style='color:purple'>"+encoded+" drew a Detonating Cat!</span>");
+
+			cardHUD("exploding", 1000);
+
+			return;
+		}
+
 		console.warn("WARN: received unknown data from server: "+ev.data);
 	}
 
 	this.send = function(msg) {
+		console.log(">> "+msg);
 		this.conn.send(msg);
 	}
 }
