@@ -99,8 +99,16 @@ func (h *Hand) cardList() (list string) {
 	return
 }
 
+func (h *Hand) getCard(num int) string {
+	return h.cards[num]
+}
+
 func (h *Hand) addCard(card string) {
 	h.cards = append(h.cards, card)
+}
+
+func (h *Hand) removeCard(num int) {
+	h.cards = append(h.cards[:num], h.cards[num+1:]...)
 }
 
 func (h *Hand) contains(wanted string) bool {
@@ -110,4 +118,8 @@ func (h *Hand) contains(wanted string) bool {
 		}
 	}
 	return false
+}
+
+func (h *Hand) getLength() int {
+	return len(h.cards)
 }

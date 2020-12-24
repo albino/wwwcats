@@ -2,6 +2,7 @@ package main
 
 import (
 	"strings"
+	"strconv"
 	"log"
 	"math/rand"
 	"time"
@@ -17,6 +18,7 @@ type Game struct {
 	// with the client every time it's updated.
 	players []*Client
 	currentPlayer int
+	defusing bool
 
 	// It's easier if we index the spectators, so we use a map
 	// Only synced with the client during netburst
@@ -109,7 +111,7 @@ func (g *Game) downgradePlayer(client *Client) {
 	}
 
 	// If they are currently playing, advance to the next player
-	if currentlyPlaying {
+	if currentlyPlaying && len(g.players) > 0 {
 		g.nextTurn()
 	}
 }
@@ -238,6 +240,42 @@ func (g *Game) readFromClient(c *Client, msg string) {
 		return
 	}
 
+	if fields[0] == "play" {
+		_, ok := g.spectators[c]
+		if ok {
+			return
+		}
+
+		if g.currentPlayer >= len(g.players) {
+			return
+		}
+
+		card, err := strconv.Atoi(fields[1])
+		if err != nil {
+			c.sendMsg("err illegal_move")
+			return
+		}
+
+		if card >= g.hands[c].getLength() {
+			c.sendMsg("err illegal_move")
+			return
+		}
+
+		cardText := g.hands[c].getCard(card)
+
+		// TODO: more complex noping
+		if cardText != "nope" && g.players[g.currentPlayer].name != c.name {
+			c.sendMsg("err illegal_move")
+			return
+		}
+
+		g.hands[c].removeCard(card)
+		c.sendMsg("hand" + g.hands[c].cardList())
+		g.playsCard(c, cardText)
+
+		return
+	}
+
 	log.Println("Uncaught message from", c.name + ":", msg)
 }
 
@@ -252,8 +290,10 @@ func (g *Game) drawCard(c *Client) {
 			return
 		}
 
-		// TODO defusal
+		g.defusing = true
+		c.sendMsg("defusing")
 
+		g.nextTurn()
 		return
 	}
 
@@ -266,6 +306,10 @@ func (g *Game) drawCard(c *Client) {
 
 	g.currentPlayer++
 	g.nextTurn()
+}
+
+func (g *Game) playsCard(player *Client, card string) {
+	g.lobby.sendBcast("played "+player.name+" "+card)
 }
 
 func (g *Game) nextTurn() {

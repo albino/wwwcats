@@ -4,6 +4,8 @@ var GameState = function() {
 	this.conn = null;
 
 	this.started = false;
+	this.defusing = false;
+	this.ourTurn = false;
 
 	// Player and lobby name
 
@@ -51,7 +53,16 @@ var GameState = function() {
 				}
 			});
 		})(this);
-		
+
+		// Draw a card
+		(function(gameState) {
+			$("#draw-pile").on('click', function() {
+				if (gameState.ourTurn) {
+					gameState.send("draw");
+				}
+			});
+		})(this);
+
 		this.console("<span style='color:yellow'>Welcome to Detonating Cats!</span>");
 
 		// We're ready to bring the game board into view
@@ -205,8 +216,17 @@ var GameState = function() {
 			$("#card-deck").empty();
 
 			for (var i=1; i < parts.length; i++) {
-				$("#card-deck").append("<img class='card' src='assets/card_"+parts[i]+".png' /> ");
-				// NB trailing whitespace hack
+				var card = $("<img class='card' src='assets/card_"+parts[i]+".png' />");
+
+				(function (gameState, cardNo, cardName) {
+					card.on("click", function() {
+						if (gameState.ourTurn || cardName === "nope") {
+							gameState.send("play "+cardNo.toString());
+						}
+					});
+				})(this, i-1, parts[i]);
+
+				$("#card-deck").append(card);
 			}
 
 			return;
@@ -234,15 +254,9 @@ var GameState = function() {
 			} );
 
 			if (parts[1] == this.name) {
-				// it is our go!!
-				(function(gameState) {
-					$("#draw-pile").off('click').on('click', function() {
-						gameState.send("draw");
-					});
-				})(this);
+				this.ourTurn = true;
 			} else {
-				// it is no longer our go
-				$("#draw-pile").unbind("click");
+				this.ourTurn = false;
 			}
 
 			return;
@@ -277,8 +291,24 @@ var GameState = function() {
 		}
 
 		if (parts[0] == "wins") {
+			this.ourTurn = false;
 			let encoded = entities(parts[1]);
 			this.console("<span style='color:deepskyblue'>"+encoded+" won!</span>");
+			return;
+		}
+
+		if (parts[0] == "defusing") {
+			this.console(strings["must_defuse"]);
+			this.defusing = true;
+			return;
+		}
+
+		if (parts[0] == "played") {
+			let encoded = entities(parts[1]);
+			this.console(encoded+" played "+strings["card_"+parts[2]]+".");
+			
+			cardHUD(parts[2], 1000);
+
 			return;
 		}
 
