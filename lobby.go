@@ -56,6 +56,11 @@ func (l *Lobby) run(lobbies map[string]*Lobby) {
 			l.currentGame.netburst(client)
 
 		case client := <-l.unregister:
+			// Announce and sync
+			// We need to do this before we close the channel
+			l.currentGame.removePlayer(client)
+			l.sendBcast("parts "+client.name)
+
 			if _, ok := l.clients[client]; ok {
 				delete(l.clients, client)
 				close(client.send)
@@ -66,10 +71,6 @@ func (l *Lobby) run(lobbies map[string]*Lobby) {
 				delete(lobbies, l.name)
 				return
 			}
-
-			// Announce and sync
-			l.sendBcast("parts "+client.name)
-			l.currentGame.removePlayer(client)
 
 		case bytes := <-l.bcast:
 			for client := range l.clients {
