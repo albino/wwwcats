@@ -46,20 +46,13 @@ func (l *Lobby) run(lobbies map[string]*Lobby) {
 		case client := <-l.register:
 			l.clients[client] = true
 
-			// Announce the join
-			l.sendBcast("joins "+client.name)
-
 			// Sync the join to the game object
 			l.currentGame.addPlayer(client)
-
-			// Sync the game state to the new client
-			l.currentGame.netburst(client)
 
 		case client := <-l.unregister:
 			// Announce and sync
 			// We need to do this before we close the channel
 			l.currentGame.removePlayer(client)
-			l.sendBcast("parts "+client.name)
 
 			if _, ok := l.clients[client]; ok {
 				delete(l.clients, client)

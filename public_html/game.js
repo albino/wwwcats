@@ -3,6 +3,8 @@ var GameState = function() {
 
 	this.conn = null;
 
+	this.started = false;
+
 	// Player and lobby name
 
 	this.name = "";
@@ -56,6 +58,8 @@ var GameState = function() {
 		$("body").css("background-color", "black");
 		$("#welcome").toggleClass("reveal");
 		$("#game-view").toggleClass("reveal");
+
+		this.started = true;
 	}
 
 	this.console = function(msg) {
@@ -79,7 +83,9 @@ var GameState = function() {
 
 		if (parts[0] == "joins" && parts[1] == this.name) {
 			// We're in!
-			this.start();
+			if (!this.started) {
+				this.start();
+			}
 			return;
 		}
 
@@ -231,7 +237,6 @@ var GameState = function() {
 				// it is our go!!
 				(function(gameState) {
 					$("#draw-pile").off('click').on('click', function() {
-						console.log("click event fired!");
 						gameState.send("draw");
 					});
 				})(this);
@@ -268,6 +273,12 @@ var GameState = function() {
 
 			cardHUD("exploding", 1000);
 
+			return;
+		}
+
+		if (parts[0] == "wins") {
+			let encoded = entities(parts[1]);
+			this.console("<span style='color:deepskyblue'>"+encoded+" won!</span>");
 			return;
 		}
 

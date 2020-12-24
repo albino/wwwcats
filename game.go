@@ -37,6 +37,8 @@ func newGame(lobby *Lobby) *Game {
 
 func (g *Game) addPlayer(client *Client) {
 	g.spectators[client] = true
+	g.lobby.sendBcast("joins "+client.name)
+	g.netburst(client)
 }
 
 func (g *Game) removePlayer(client *Client) {
@@ -47,6 +49,7 @@ func (g *Game) removePlayer(client *Client) {
 	}
 
 	delete(g.spectators, client)
+	g.lobby.sendBcast("parts "+client.name)
 }
 
 func (g *Game) playerNumber(client *Client) (num int) {
@@ -83,6 +86,7 @@ func (g *Game) downgradePlayer(client *Client) {
 	clientToRemove := g.playerNumber(client)
 	g.players = append(g.players[:clientToRemove], g.players[clientToRemove+1:]...)
 	g.spectators[client] = true
+	delete(g.hands, client)
 
 	g.lobby.sendBcast("downgrades "+client.name)
 	g.lobby.sendBcast("players" + g.playerList())
@@ -95,12 +99,40 @@ func (g *Game) downgradePlayer(client *Client) {
 
 	// Gracefully remove the player from the game in progress
 	client.sendMsg("message spectating_exploded");
+
 	// Erase their hand
 	client.sendMsg("hand")
+
+	if len(g.players) == 1 {
+		go g.wins(g.players[0])
+		return
+	}
+
 	// If they are currently playing, advance to the next player
 	if currentlyPlaying {
 		g.nextTurn()
 	}
+}
+
+func (g *Game) wins(winner *Client) {
+	g.lobby.sendBcast("wins "+winner.name)
+
+	// This function runs a separate goroutine, so it's safe to sleep
+	time.Sleep(5 * time.Second)
+
+	// Destroy the game and create a new one
+	g.lobby.sendBcast("hand")
+	g.lobby.sendBcast("draw_pile no")
+	g.lobby.sendBcast("bcast new_game")
+
+	g.lobby.currentGame = newGame(g.lobby)
+	for client := range g.lobby.clients {
+		g.lobby.currentGame.addPlayer(client)
+		// We add a very short delay to allow each joining client to be processed separately
+		time.Sleep(50 * time.Millisecond)
+	}
+
+	// The GC should now be able to collect this old game object, I think
 }
 
 func (g *Game) netburst(client *Client) {
@@ -185,6 +217,10 @@ func (g *Game) readFromClient(c *Client, msg string) {
 	if fields[0] == "draw" {
 		_, ok := g.spectators[c]
 		if ok {
+			return
+		}
+
+		if g.currentPlayer >= len(g.players) {
 			return
 		}
 

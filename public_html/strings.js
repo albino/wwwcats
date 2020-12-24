@@ -21,5 +21,6 @@ var strings = {
 	"message_spectating_started": "You are spectating and can join once this round has finished.",
 	"message_spectating_exploded": "You are out for this round.",
 	"message_playing": "Type <b>/start</b> to start the game, or <b>/leave</b> to spectate.",
-	"bcast_starting": "<span style='color:yellow'>The game is starting!</span>"
+	"bcast_starting": "<span style='color:yellow'>The game is starting!</span>",
+	"bcast_new_game": "<span style='color:yellow'>A new game has started.</span>"
 };
