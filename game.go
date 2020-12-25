@@ -125,6 +125,7 @@ func (g *Game) wins(winner *Client) {
 	// Destroy the game and create a new one
 	g.lobby.sendBcast("hand")
 	g.lobby.sendBcast("draw_pile no")
+	g.lobby.sendBcast("no_discard")
 	g.lobby.sendBcast("bcast new_game")
 
 	g.lobby.currentGame = newGame(g.lobby)
@@ -236,6 +237,10 @@ func (g *Game) readFromClient(c *Client, msg string) {
 			return
 		}
 
+		if g.defusing {
+			return
+		}
+
 		g.drawCard(c)
 		return
 	}
@@ -263,6 +268,10 @@ func (g *Game) readFromClient(c *Client, msg string) {
 
 		cardText := g.hands[c].getCard(card)
 
+		if g.defusing && cardText != "defuse" {
+			return
+		}
+
 		// TODO: more complex noping
 		if cardText != "nope" && g.players[g.currentPlayer].name != c.name {
 			c.sendMsg("err illegal_move")
@@ -273,6 +282,11 @@ func (g *Game) readFromClient(c *Client, msg string) {
 		c.sendMsg("hand" + g.hands[c].cardList())
 		g.playsCard(c, cardText)
 
+		return
+	}
+
+	if fields[0] == "a" {
+		g.answersQuestion(c, fields[1], fields[2])
 		return
 	}
 
@@ -310,6 +324,48 @@ func (g *Game) drawCard(c *Client) {
 
 func (g *Game) playsCard(player *Client, card string) {
 	g.lobby.sendBcast("played "+player.name+" "+card)
+
+	switch card {
+	case "defuse":
+		if !g.defusing {
+			return
+		}
+
+		player.sendMsg("q defuse_pos")
+	default:
+		log.Println("unhandled card: ", card)
+	}
+}
+
+func (g *Game) answersQuestion(player *Client, question string, answer string) {
+	switch question {
+	case "defuse_pos":
+		if !g.defusing {
+			return
+		}
+
+		if g.players[g.currentPlayer] != player {
+			return
+		}
+
+		pos, err := strconv.Atoi(answer)
+		if err != nil {
+			player.sendMsg("q "+question)
+			return
+		}
+
+		if pos > g.deck.cardsLeft() {
+			player.sendMsg("q "+question)
+			return
+		}
+
+		g.deck.insertAtPos(pos, "exploding")
+		g.defusing = false
+		g.currentPlayer++
+		g.nextTurn()
+	default:
+		log.Println("unexpected Q/A: ", question, answer)
+	}
 }
 
 func (g *Game) nextTurn() {
@@ -323,6 +379,8 @@ func (g *Game) nextTurn() {
 	g.lobby.sendBcast("now_playing "+g.players[g.currentPlayer].name)
 	if g.deck.cardsLeft() == 0 {
 		g.lobby.sendBcast("draw_pile no")
+	} else {
+		g.lobby.sendBcast("draw_pile yes")
 	}
 }
 

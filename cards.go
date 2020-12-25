@@ -56,6 +56,14 @@ func (d *Deck) insertMultiple(cards map[string]int) {
 	}
 }
 
+func (d *Deck) insertAtPos(pos int, card string) {
+	// the top of the deck is the end of the array
+	pos = len(d.cards) - (pos)
+	d.cards = append(d.cards, "")
+	copy(d.cards[pos+1:], d.cards[pos:])
+	d.cards[pos] = card
+}
+
 func (d *Deck) draw() (card string) {
 	// pop
 	card, d.cards = d.cards[len(d.cards)-1], d.cards[:len(d.cards)-1]

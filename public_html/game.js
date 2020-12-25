@@ -220,6 +220,7 @@ var GameState = function() {
 
 				(function (gameState, cardNo, cardName) {
 					card.on("click", function() {
+						// TODO: check whether it's ok to play this card or if we are throwing it away
 						if (gameState.ourTurn || cardName === "nope") {
 							gameState.send("play "+cardNo.toString());
 						}
@@ -307,7 +308,21 @@ var GameState = function() {
 			let encoded = entities(parts[1]);
 			this.console(encoded+" played "+strings["card_"+parts[2]]+".");
 			
+			$("#discard-pile").html("<img class='card' src='assets/card_"+parts[2]+".png' />");
 			cardHUD(parts[2], 1000);
+
+			return;
+		}
+
+		if (parts[0] == "no_discard") {
+			$("#discard-pile").html("");
+			return;
+		}
+
+		if (parts[0] == "q") {
+			// TODO: nicer GUI for this
+			ans = prompt(strings["question_"+parts[1]]);
+			this.send("a "+parts[1]+" "+ans);
 
 			return;
 		}

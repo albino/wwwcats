@@ -23,5 +23,6 @@ var strings = {
 	"message_playing": "Type <b>/start</b> to start the game, or <b>/leave</b> to spectate.",
 	"bcast_starting": "<span style='color:yellow'>The game is starting!</span>",
 	"bcast_new_game": "<span style='color:yellow'>A new game has started.</span>",
-	"must_defuse": "<span style='color:purple'>You must defuse the Detonating Cat.</span>"
+	"must_defuse": "<span style='color:purple'>You must defuse the Detonating Cat.</span>",
+	"question_defuse_pos": "Where should the Detonating Cat be placed in the deck? (0 = on top)"
 };
