@@ -131,3 +131,27 @@ func (h *Hand) contains(wanted string) bool {
 func (h *Hand) getLength() int {
 	return len(h.cards)
 }
+
+type GameState struct {
+	// Used to save the game state before performing a NOPEable action
+	deck Deck
+	currentPlayer int
+}
+
+func makeGameState(g *Game) *GameState {
+	// Copy everything
+	cards := make([]string, len(g.deck.cards))
+	copy(cards, g.deck.cards)
+
+	return &GameState {
+		deck: Deck {
+			cards: cards,
+		},
+		currentPlayer: g.currentPlayer,
+	}
+}
+
+func (gs *GameState) restore(g *Game) {
+	g.deck = &gs.deck
+	g.currentPlayer = gs.currentPlayer
+}

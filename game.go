@@ -26,6 +26,9 @@ type Game struct {
 
 	deck *Deck
 	hands map[*Client]*Hand
+
+	// We store one action's worth of 'history' in case of a nope
+	history *GameState
 }
 
 func newGame(lobby *Lobby) *Game {
@@ -272,7 +275,6 @@ func (g *Game) readFromClient(c *Client, msg string) {
 			return
 		}
 
-		// TODO: more complex noping
 		if cardText != "nope" && g.players[g.currentPlayer].name != c.name {
 			c.sendMsg("err illegal_move")
 			return
@@ -295,6 +297,7 @@ func (g *Game) readFromClient(c *Client, msg string) {
 
 func (g *Game) drawCard(c *Client) {
 	card := g.deck.draw()
+	g.history = nil
 
 	if card == "exploding" {
 		g.lobby.sendBcast("exploded "+c.name)
@@ -332,6 +335,17 @@ func (g *Game) playsCard(player *Client, card string) {
 		}
 
 		player.sendMsg("q defuse_pos")
+	case "shuffle":
+		g.history = makeGameState(g)
+		g.deck.shuffle()
+	case "nope":
+		if g.history == nil {
+			g.lobby.sendBcast("bcast no_nope")
+			return
+		}
+
+		g.history.restore(g)
+		g.nextTurn()
 	default:
 		log.Println("unhandled card: ", card)
 	}

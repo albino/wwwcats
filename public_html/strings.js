@@ -5,8 +5,8 @@ var strings = {
 	"card_favour": "Favour",
 	"card_nope": "Nope!",
 	"card_random1": "BEANS Cat",
-	"card_random2": "random card 2",
-	"card_random3": "random card 3",
+	"card_random2": "CHUFFing Cat",
+	"card_random3": "Fridge Cat",
 	"card_random4": "random card 4",
 	"card_random5": "random card 5",
 	"card_see3": "See the Future (x3)",
@@ -23,6 +23,7 @@ var strings = {
 	"message_playing": "Type <b>/start</b> to start the game, or <b>/leave</b> to spectate.",
 	"bcast_starting": "<span style='color:yellow'>The game is starting!</span>",
 	"bcast_new_game": "<span style='color:yellow'>A new game has started.</span>",
+	"bcast_no_nope": "Nope! There is nothing to Nope!",
 	"must_defuse": "<span style='color:purple'>You must defuse the Detonating Cat.</span>",
 	"question_defuse_pos": "Where should the Detonating Cat be placed in the deck? (0 = on top)"
 };
