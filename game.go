@@ -347,7 +347,11 @@ func (g *Game) playsCard(player *Client, card string) {
 			return
 		}
 
+		// Back up the game state before restoring the old one
+		// - that way, you can NOPE a NOPE
+		history := makeGameState(g)
 		g.history.restore(g)
+		g.history = history
 		g.nextTurn()
 	case "skip":
 		g.history = makeGameState(g)
