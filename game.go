@@ -18,7 +18,10 @@ type Game struct {
 	// with the client every time it's updated.
 	players []*Client
 	currentPlayer int
+
+	// Various game-related variables
 	defusing bool
+	attack bool
 
 	// It's easier if we index the spectators, so we use a map
 	// Only synced with the client during netburst
@@ -321,7 +324,7 @@ func (g *Game) drawCard(c *Client) {
 	// Tell everyone else that a mystery card was drawn
 	g.lobby.sendComplexBcast("drew_other "+c.name, map[*Client]bool{c: true})
 
-	g.currentPlayer++
+	g.incrementTurn()
 	g.nextTurn()
 }
 
@@ -345,6 +348,20 @@ func (g *Game) playsCard(player *Client, card string) {
 		}
 
 		g.history.restore(g)
+		g.nextTurn()
+	case "skip":
+		g.history = makeGameState(g)
+		g.incrementTurn()
+		g.nextTurn()
+	case "attack":
+		g.history = makeGameState(g)
+		if g.attack {
+			// player is on the first turn of an attack
+			g.attack = false
+		} else {
+			g.currentPlayer++
+			g.attack = true
+		}
 		g.nextTurn()
 	default:
 		log.Println("unhandled card: ", card)
@@ -375,11 +392,25 @@ func (g *Game) answersQuestion(player *Client, question string, answer string) {
 
 		g.deck.insertAtPos(pos, "exploding")
 		g.defusing = false
-		g.currentPlayer++
+		g.incrementTurn()
 		g.nextTurn()
 	default:
 		log.Println("unexpected Q/A: ", question, answer)
 	}
+}
+
+func (g *Game) incrementTurn() {
+	// Changes the turn counter to the next player
+	// (or not, if an attack has been played)
+
+	if g.attack {
+		g.attack = false
+		return
+	}
+
+	g.currentPlayer++
+
+	return
 }
 
 func (g *Game) nextTurn() {

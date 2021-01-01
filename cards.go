@@ -134,8 +134,10 @@ func (h *Hand) getLength() int {
 
 type GameState struct {
 	// Used to save the game state before performing a NOPEable action
+	// needs to contain anything that can be reversed by a NOPE
 	deck Deck
 	currentPlayer int
+	attack bool
 }
 
 func makeGameState(g *Game) *GameState {
@@ -148,10 +150,12 @@ func makeGameState(g *Game) *GameState {
 			cards: cards,
 		},
 		currentPlayer: g.currentPlayer,
+		attack: g.attack,
 	}
 }
 
 func (gs *GameState) restore(g *Game) {
 	g.deck = &gs.deck
 	g.currentPlayer = gs.currentPlayer
+	g.attack = gs.attack
 }
