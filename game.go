@@ -9,9 +9,13 @@ import (
 )
 
 type Game struct {
+	// The corresponding Lobby object, to allow communication
+	// with clients
 	lobby *Lobby
 
-	started bool
+	// It's easier if we index the spectators, so we use a map
+	// Only synced with the client during netburst
+	spectators map[*Client]bool
 
 	// We need a strict order for players, so we use a slice
 	// The player list is order-sensitive, so we re-sync it
@@ -20,12 +24,9 @@ type Game struct {
 	currentPlayer int
 
 	// Various game-related variables
+	started bool
 	defusing bool
 	attack bool
-
-	// It's easier if we index the spectators, so we use a map
-	// Only synced with the client during netburst
-	spectators map[*Client]bool
 
 	deck *Deck
 	hands map[*Client]*Hand
