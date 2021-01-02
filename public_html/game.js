@@ -309,7 +309,10 @@ var GameState = function() {
 			this.console(encoded+" played "+strings["card_"+parts[2]]+".");
 			
 			$("#discard-pile").html("<img class='card' src='assets/card_"+parts[2]+".png' />");
-			cardHUD(parts[2], 1000);
+
+			if (parts[2] != "see3") {
+				cardHUD(parts[2], 1000);
+			}
 
 			return;
 		}
@@ -324,6 +327,13 @@ var GameState = function() {
 			ans = prompt(strings["question_"+parts[1]]);
 			this.send("a "+parts[1]+" "+ans);
 
+			return;
+		}
+
+		if (parts[0] == "seen") {
+			cardHUD3(parts.slice(1), 2000);
+			this.console("You saw "+strings["card_"+parts[1]]+", "+strings["card_"+parts[2]]+" and "+
+				strings["card_"+parts[3]]+".");
 			return;
 		}
 

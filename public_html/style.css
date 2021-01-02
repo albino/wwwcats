@@ -172,7 +172,7 @@ input#chat-message {
 	flex: 1 1 auto;
 }
 
-div#card-hud {
+div.card-hud {
 	z-index: 1;
 	background-color: rgba(0, 0, 0, 0.5);
 	opacity: 0;
@@ -186,4 +186,19 @@ div#card-hud > img.card {
 	margin: auto;
 	height: 400px;
 	display: block;
+}
+div#card-hud-3-wrapper {
+	padding-top: 242px;
+	height: 558px;
+}
+div#card-hud-3 {
+	text-align: center;
+}
+div#card-hud-3 > img.card {
+	display: inline-block;
+	height: 300px;
+	margin-right: 20px;
+}
+div#card-hud-3 > img.card:last-child {
+	margin-right: 0;
 }

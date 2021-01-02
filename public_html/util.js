@@ -51,3 +51,23 @@ function cardHUD(card, time) {
 		}, 500);
 	}, time);
 }
+
+function cardHUD3(cards, time) {
+	cards.forEach(function(card) {
+		$("#card-hud-3").append("<img class='card' src='assets/card_"+card+".png' />");
+	});
+	$("#card-hud-3-wrapper").removeClass("reveal");
+
+	setTimeout(function() {
+		$("#card-hud-3-wrapper").css("opacity", "1");
+	}, 100);
+
+	setTimeout(function() {
+		$("#card-hud-3-wrapper").css("opacity", "0");
+
+		setTimeout(function() {
+			$("#card-hud-3").empty();
+			$("#card-hud-3-wrapper").addClass("reveal");
+		}, 500);
+	}, time);
+}

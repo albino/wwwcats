@@ -367,6 +367,10 @@ func (g *Game) playsCard(player *Client, card string) {
 			g.attack = true
 		}
 		g.nextTurn()
+	case "see3":
+		cards := g.deck.peek(3)
+		player.sendMsg("seen "+strings.Join(cards, " "))
+		g.history = nil
 	default:
 		log.Println("unhandled card: ", card)
 	}

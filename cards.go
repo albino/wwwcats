@@ -70,6 +70,29 @@ func (d *Deck) draw() (card string) {
 	return
 }
 
+func (d *Deck) peek(num int) (ret []string) {
+	from := len(d.cards) - num
+	if from < 0 {
+		from = 0
+	}
+
+	length := num
+	if len(d.cards) < num {
+		length = len(d.cards)
+	}
+
+	ret = make([]string, length)
+	copy(ret, d.cards[from:])
+
+	// Reverse
+	for i := len(ret)/2-1; i >= 0; i-- {
+		opp := len(ret)-1-i
+		ret[i], ret[opp] = ret[opp], ret[i]
+	}
+
+	return
+}
+
 func (d *Deck) shuffle() {
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(d.cards), func (i, j int) {
