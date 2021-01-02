@@ -9,12 +9,12 @@ type Lobby struct {
 	name string
 
 	// Client management
-	clients map[*Client]bool
-	register chan *Client
+	clients    map[*Client]bool
+	register   chan *Client
 	unregister chan *Client
 
 	// Broadcast
-	bcast chan []byte
+	bcast        chan []byte
 	complexBcast chan *ComplexBcast
 
 	currentGame *Game
@@ -22,15 +22,15 @@ type Lobby struct {
 
 func newLobby(name string) (lobby *Lobby) {
 	lobby = &Lobby{
-		name: name,
+		name:    name,
 		clients: make(map[*Client]bool),
 
 		// We make channels with a small buffer, in case we need to
 		// write to them from their own goroutine for convenience
 
-		register: make(chan *Client, 64),
-		unregister: make(chan *Client, 64),
-		bcast: make(chan []byte, 64),
+		register:     make(chan *Client, 64),
+		unregister:   make(chan *Client, 64),
+		bcast:        make(chan []byte, 64),
 		complexBcast: make(chan *ComplexBcast, 64),
 	}
 	lobby.currentGame = newGame(lobby)
@@ -130,7 +130,7 @@ func (l *Lobby) readFromClient(c *Client, msg string) {
 	// Lobby-wide commands
 
 	if fields[0] == "chat" {
-		l.sendBcast("chat "+c.name+" "+msg[5:])
+		l.sendBcast("chat " + c.name + " " + msg[5:])
 		return
 	}
 
@@ -149,13 +149,13 @@ func (l *Lobby) sendBcast(msg string) {
 type ComplexBcast struct {
 	// We use this type when we need to send a message to all clients _except_ one
 	except map[*Client]bool
-	text string
+	text   string
 }
 
 func (l *Lobby) sendComplexBcast(text string, except map[*Client]bool) {
 	bcast := &ComplexBcast{
 		except: except,
-		text: text,
+		text:   text,
 	}
 
 	select {

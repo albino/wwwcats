@@ -1,9 +1,9 @@
 package main
 
 import (
-	"time"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -28,7 +28,7 @@ type Client struct {
 	// Buffer for outgoing messages
 	send chan []byte
 
-	name string
+	name  string
 	lobby *Lobby
 }
 
@@ -120,12 +120,12 @@ func (c *Client) writePump() {
 			w.Write(message)
 
 			/*
-			// Finish writing whatever is left
-			n := len(c.send)
-			for i := 0; i < n; i++ {
-				w.Write([]byte("\r\n"))
-				w.Write(<-c.send)
-			}
+				// Finish writing whatever is left
+				n := len(c.send)
+				for i := 0; i < n; i++ {
+					w.Write([]byte("\r\n"))
+					w.Write(<-c.send)
+				}
 			*/
 
 			if err := w.Close(); err != nil {
@@ -141,7 +141,7 @@ func (c *Client) writePump() {
 	}
 }
 
-func (c *Client) sendMsg (message string) {
+func (c *Client) sendMsg(message string) {
 	select {
 	case c.send <- []byte(message):
 	default:

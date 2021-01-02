@@ -15,12 +15,12 @@ func newDeck() (d *Deck) {
 
 	// Add all the cards, EXCEPT those which should not be dealt to players
 	d.insertMultiple(map[string]int{
-		"nope": 5,
-		"attack": 4,
-		"skip": 4,
-		"favour": 4,
+		"nope":    5,
+		"attack":  4,
+		"skip":    4,
+		"favour":  4,
 		"shuffle": 4,
-		"see3": 5,
+		"see3":    5,
 		"random1": 4,
 		"random2": 4,
 		"random3": 4,
@@ -36,7 +36,7 @@ func newDeck() (d *Deck) {
 func (d *Deck) addExtraCards(players int) {
 	d.insertMultiple(map[string]int{
 		"exploding": players - 1,
-		"defuse": 6 - players,
+		"defuse":    6 - players,
 	})
 
 	d.shuffle()
@@ -85,8 +85,8 @@ func (d *Deck) peek(num int) (ret []string) {
 	copy(ret, d.cards[from:])
 
 	// Reverse
-	for i := len(ret)/2-1; i >= 0; i-- {
-		opp := len(ret)-1-i
+	for i := len(ret)/2 - 1; i >= 0; i-- {
+		opp := len(ret) - 1 - i
 		ret[i], ret[opp] = ret[opp], ret[i]
 	}
 
@@ -95,7 +95,7 @@ func (d *Deck) peek(num int) (ret []string) {
 
 func (d *Deck) shuffle() {
 	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(d.cards), func (i, j int) {
+	rand.Shuffle(len(d.cards), func(i, j int) {
 		d.cards[i], d.cards[j] = d.cards[j], d.cards[i]
 	})
 }
@@ -158,9 +158,9 @@ func (h *Hand) getLength() int {
 type GameState struct {
 	// Used to save the game state before performing a NOPEable action
 	// needs to contain anything that can be reversed by a NOPE
-	deck Deck
+	deck          Deck
 	currentPlayer int
-	attack bool
+	attack        bool
 }
 
 func makeGameState(g *Game) *GameState {
@@ -168,12 +168,12 @@ func makeGameState(g *Game) *GameState {
 	cards := make([]string, len(g.deck.cards))
 	copy(cards, g.deck.cards)
 
-	return &GameState {
-		deck: Deck {
+	return &GameState{
+		deck: Deck{
 			cards: cards,
 		},
 		currentPlayer: g.currentPlayer,
-		attack: g.attack,
+		attack:        g.attack,
 	}
 }
 

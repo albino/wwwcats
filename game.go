@@ -1,10 +1,10 @@
 package main
 
 import (
-	"strings"
-	"strconv"
 	"log"
 	"math/rand"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -20,15 +20,15 @@ type Game struct {
 	// We need a strict order for players, so we use a slice
 	// The player list is order-sensitive, so we re-sync it
 	// with the client every time it's updated.
-	players []*Client
+	players       []*Client
 	currentPlayer int
 
 	// Various game-related variables
-	started bool
+	started  bool
 	defusing bool
-	attack bool
+	attack   bool
 
-	deck *Deck
+	deck  *Deck
 	hands map[*Client]*Hand
 
 	// We store one action's worth of 'history' in case of a nope
@@ -36,17 +36,17 @@ type Game struct {
 }
 
 func newGame(lobby *Lobby) *Game {
-	return &Game {
-		lobby: lobby,
-		spectators: make(map[*Client]bool),
-		hands: make(map[*Client]*Hand),
+	return &Game{
+		lobby:         lobby,
+		spectators:    make(map[*Client]bool),
+		hands:         make(map[*Client]*Hand),
 		currentPlayer: -1,
 	}
 }
 
 func (g *Game) addPlayer(client *Client) {
 	g.spectators[client] = true
-	g.lobby.sendBcast("joins "+client.name)
+	g.lobby.sendBcast("joins " + client.name)
 	g.netburst(client)
 }
 
@@ -58,7 +58,7 @@ func (g *Game) removePlayer(client *Client) {
 	}
 
 	delete(g.spectators, client)
-	g.lobby.sendBcast("parts "+client.name)
+	g.lobby.sendBcast("parts " + client.name)
 }
 
 func (g *Game) playerNumber(client *Client) (num int) {
@@ -79,11 +79,11 @@ func (g *Game) upgradePlayer(client *Client) {
 	delete(g.spectators, client)
 	g.players = append(g.players, client)
 
-	g.lobby.sendBcast("upgrades "+client.name)
+	g.lobby.sendBcast("upgrades " + client.name)
 	g.lobby.sendBcast("players" + g.playerList())
 
 	// Display a message to tell the client they are playing
-	client.sendMsg("message playing");
+	client.sendMsg("message playing")
 }
 
 func (g *Game) downgradePlayer(client *Client) {
@@ -97,17 +97,17 @@ func (g *Game) downgradePlayer(client *Client) {
 	g.spectators[client] = true
 	delete(g.hands, client)
 
-	g.lobby.sendBcast("downgrades "+client.name)
+	g.lobby.sendBcast("downgrades " + client.name)
 	g.lobby.sendBcast("players" + g.playerList())
 
-	if (!g.started) {
+	if !g.started {
 		// Display a message to tell the client they are spectating
-		client.sendMsg("message spectating");
+		client.sendMsg("message spectating")
 		return
 	}
 
 	// Gracefully remove the player from the game in progress
-	client.sendMsg("message spectating_exploded");
+	client.sendMsg("message spectating_exploded")
 
 	// Erase their hand
 	client.sendMsg("hand")
@@ -124,7 +124,7 @@ func (g *Game) downgradePlayer(client *Client) {
 }
 
 func (g *Game) wins(winner *Client) {
-	g.lobby.sendBcast("wins "+winner.name)
+	g.lobby.sendBcast("wins " + winner.name)
 
 	// This function runs a separate goroutine, so it's safe to sleep
 	time.Sleep(5 * time.Second)
@@ -152,7 +152,7 @@ func (g *Game) netburst(client *Client) {
 
 	// Display a message to tell the client they are spectating
 	if !g.started {
-		client.sendMsg("message spectating");
+		client.sendMsg("message spectating")
 		return
 	}
 
@@ -296,7 +296,7 @@ func (g *Game) readFromClient(c *Client, msg string) {
 		return
 	}
 
-	log.Println("Uncaught message from", c.name + ":", msg)
+	log.Println("Uncaught message from", c.name+":", msg)
 }
 
 func (g *Game) drawCard(c *Client) {
@@ -304,7 +304,7 @@ func (g *Game) drawCard(c *Client) {
 	g.history = nil
 
 	if card == "exploding" {
-		g.lobby.sendBcast("exploded "+c.name)
+		g.lobby.sendBcast("exploded " + c.name)
 
 		if !g.hands[c].contains("defuse") {
 			g.downgradePlayer(c)
@@ -321,7 +321,7 @@ func (g *Game) drawCard(c *Client) {
 	g.hands[c].addCard(card)
 	c.sendMsg("hand" + g.hands[c].cardList())
 	// Tell the player what card they drew
-	c.sendMsg("drew "+card)
+	c.sendMsg("drew " + card)
 	// Tell everyone else that a mystery card was drawn
 	g.lobby.sendComplexBcast("drew_other "+c.name, map[*Client]bool{c: true})
 
@@ -330,7 +330,7 @@ func (g *Game) drawCard(c *Client) {
 }
 
 func (g *Game) playsCard(player *Client, card string) {
-	g.lobby.sendBcast("played "+player.name+" "+card)
+	g.lobby.sendBcast("played " + player.name + " " + card)
 
 	// Every case here should do something with g.history
 	// - either make a backup, or clear it so that we can't
@@ -371,7 +371,7 @@ func (g *Game) playsCard(player *Client, card string) {
 		g.nextTurn()
 	case "see3":
 		cards := g.deck.peek(3)
-		player.sendMsg("seen "+strings.Join(cards, " "))
+		player.sendMsg("seen " + strings.Join(cards, " "))
 		g.history = nil
 	default:
 		log.Println("unhandled card: ", card)
@@ -391,12 +391,12 @@ func (g *Game) answersQuestion(player *Client, question string, answer string) {
 
 		pos, err := strconv.Atoi(answer)
 		if err != nil {
-			player.sendMsg("q "+question)
+			player.sendMsg("q " + question)
 			return
 		}
 
 		if pos > g.deck.cardsLeft() {
-			player.sendMsg("q "+question)
+			player.sendMsg("q " + question)
 			return
 		}
 
@@ -431,7 +431,7 @@ func (g *Game) nextTurn() {
 		g.currentPlayer = 0
 	}
 
-	g.lobby.sendBcast("now_playing "+g.players[g.currentPlayer].name)
+	g.lobby.sendBcast("now_playing " + g.players[g.currentPlayer].name)
 	if g.deck.cardsLeft() == 0 {
 		g.lobby.sendBcast("draw_pile no")
 	} else {
@@ -446,17 +446,17 @@ func (g *Game) start() {
 
 	g.started = true
 
-	g.lobby.sendBcast("clear_message");
-	g.lobby.sendBcast("bcast starting");
+	g.lobby.sendBcast("clear_message")
+	g.lobby.sendBcast("bcast starting")
 
 	// Shuffle the player list and re-send it
 	rand.Seed(time.Now().UnixNano()) // Hard enough to predict; should be fine
-	rand.Shuffle(len(g.players), func (i, j int) {
+	rand.Shuffle(len(g.players), func(i, j int) {
 		g.players[i], g.players[j] = g.players[j], g.players[i]
 	})
 	g.currentPlayer = 0
 	g.lobby.sendBcast("players" + g.playerList())
-	g.lobby.sendBcast("now_playing "+g.players[g.currentPlayer].name)
+	g.lobby.sendBcast("now_playing " + g.players[g.currentPlayer].name)
 
 	// Generate the deck
 	g.deck = newDeck()
