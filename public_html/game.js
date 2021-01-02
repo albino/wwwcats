@@ -63,6 +63,10 @@ var GameState = function() {
 			});
 		})(this);
 
+		window.onbeforeunload = function () {
+			return ""; // Display confirmation message
+		};
+
 		this.console("<span style='color:yellow'>Welcome to Detonating Cats!</span>");
 
 		// We're ready to bring the game board into view
