@@ -331,12 +331,14 @@ func (g *Game) drawCard(c *Client) {
 func (g *Game) playsCard(player *Client, card string) {
 	g.lobby.sendBcast("played "+player.name+" "+card)
 
+	// Every case here should do something with g.history
+	// - either make a backup, or clear it so that we can't
+	// NOPE too far back into history
 	switch card {
 	case "defuse":
 		if !g.defusing {
 			return
 		}
-
 		player.sendMsg("q defuse_pos")
 	case "shuffle":
 		g.history = makeGameState(g)
@@ -346,7 +348,6 @@ func (g *Game) playsCard(player *Client, card string) {
 			g.lobby.sendBcast("bcast no_nope")
 			return
 		}
-
 		// Back up the game state before restoring the old one
 		// - that way, you can NOPE a NOPE
 		history := makeGameState(g)
