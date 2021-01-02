@@ -180,123 +180,113 @@ func (g *Game) playerList() (list string) {
 func (g *Game) readFromClient(c *Client, msg string) {
 	fields := strings.Fields(msg)
 
-	if fields[0] == "join" {
+	switch fields[0] {
+	case "join":
 		// Joining the game (from spectators)
 
 		if g.started {
 			// You can't join an active game
-			return
+			break
 		}
 
 		_, ok := g.spectators[c]
 		if !ok {
 			// Player is not a spectator!
-			return
+			break
 		}
 
 		g.upgradePlayer(c)
-		return
-	}
 
-	if fields[0] == "leave" {
+	case "leave":
 		// Leaving the game (back to spectators)
 
 		_, ok := g.spectators[c]
 		if ok {
 			// Player is a spectator!
-			return
+			break
 		}
 
 		g.downgradePlayer(c)
-		return
-	}
 
-	if fields[0] == "start" {
+	case "start":
 		if g.started {
-			return
+			break
 		}
 
 		if len(g.players) < 2 {
-			return
+			break
 		}
 
 		g.start()
-		return
-	}
 
-	if fields[0] == "draw" {
+	case "draw":
 		_, ok := g.spectators[c]
 		if ok {
-			return
+			break
 		}
 
 		if g.currentPlayer >= len(g.players) {
-			return
+			break
 		}
 
 		if g.deck.cardsLeft() < 1 {
 			c.sendMsg("err illegal_move")
-			return
+			break
 		}
 
 		if g.players[g.currentPlayer].name != c.name {
 			c.sendMsg("err illegal_move")
-			return
+			break
 		}
 
 		if g.defusing {
-			return
+			break
 		}
 
 		g.drawCard(c)
-		return
-	}
 
-	if fields[0] == "play" {
+	case "play":
 		_, ok := g.spectators[c]
 		if ok {
-			return
+			break
 		}
 
 		if g.currentPlayer >= len(g.players) {
-			return
+			break
 		}
 
 		card, err := strconv.Atoi(fields[1])
 		if err != nil {
 			c.sendMsg("err illegal_move")
-			return
+			break
 		}
 
 		if card >= g.hands[c].getLength() {
 			c.sendMsg("err illegal_move")
-			return
+			break
 		}
 
 		cardText := g.hands[c].getCard(card)
 
 		if g.defusing && cardText != "defuse" {
-			return
+			break
 		}
 
 		if cardText != "nope" && g.players[g.currentPlayer].name != c.name {
 			c.sendMsg("err illegal_move")
-			return
+			break
 		}
 
 		g.hands[c].removeCard(card)
 		c.sendMsg("hand" + g.hands[c].cardList())
 		g.playsCard(c, cardText)
 
-		return
-	}
-
-	if fields[0] == "a" {
+	case "a":
 		g.answersQuestion(c, fields[1], fields[2])
-		return
-	}
 
-	log.Println("Uncaught message from", c.name+":", msg)
+	default:
+		log.Println("Uncaught message from", c.name+":", msg)
+	} // End switch
 }
 
 func (g *Game) drawCard(c *Client) {
