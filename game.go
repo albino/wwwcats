@@ -431,7 +431,7 @@ func (g *Game) answersQuestion(player *Client, question string, answer string) {
 
 		g.favoured = target
 		g.lobby.sendComplexBcast("favoured "+player.name+" "+target.name, map[*Client]bool{target: true})
-		target.sendMsg("q favour_what "+player.name)
+		target.sendMsg("q favour_what " + player.name)
 		player.sendMsg("lock") // block further play until the transaction completes
 	case "favour_what":
 		if g.favoured != player {
