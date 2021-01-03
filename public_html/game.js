@@ -6,6 +6,8 @@ var GameState = function() {
 	this.started = false;
 	this.defusing = false;
 	this.ourTurn = false;
+	this.locked = false;
+	this.favouring = false;
 
 	// Player and lobby name
 
@@ -88,6 +90,8 @@ var GameState = function() {
 		console.log("<< "+ev.data);
 
 		var parts = ev.data.split(" ");
+
+		// TODO: cleanup and refactor
 
 		if (parts[0] == "err") {
 			alert(strings[parts[1]]);
@@ -224,6 +228,17 @@ var GameState = function() {
 
 				(function (gameState, cardNo, cardName) {
 					card.on("click", function() {
+						if (gameState.locked) {
+							return;
+						}
+
+						if (gameState.favouring) {
+							// Favour NOPE-logic is handled server-side :)
+							gameState.send("a favour_what "+cardNo.toString());
+							gameState.favouring = false;
+							return;
+						}
+
 						// TODO: check whether it's ok to play this card or if we are throwing it away
 						if (gameState.ourTurn || cardName === "nope") {
 							gameState.send("play "+cardNo.toString());
@@ -327,6 +342,14 @@ var GameState = function() {
 		}
 
 		if (parts[0] == "q") {
+			if (parts[1] == "favour_what") {
+				this.favouring = true;
+				let perpetrator = entities(parts[2]);
+				this.console("<span style='color:deepskyblue'>" + perpetrator +
+					" is asking you for a favour.</span>");
+				return;
+			}
+
 			// TODO: nicer GUI for this
 			ans = prompt(strings["question_"+parts[1]]);
 			this.send("a "+parts[1]+" "+ans);
@@ -338,6 +361,37 @@ var GameState = function() {
 			cardHUD3(parts.slice(1), 2000);
 			this.console("You saw "+strings["card_"+parts[1]]+", "+strings["card_"+parts[2]]+" and "+
 				strings["card_"+parts[3]]+".");
+			return;
+		}
+
+		if (parts[0] == "favoured" || parts[0] == "favour_complete") {
+			let perpetrator = entities(parts[1]);
+			let victim = entities(parts[2]);
+			if (parts[0] == "favoured") {
+				this.console(perpetrator+" is asking "+victim+" for a favour.");
+			} else {
+				this.console(victim+" gave "+perpetrator+" a favour.");
+			}
+			return;
+		}
+		if (parts[0] == "favour_recv" || parts[0] == "favour_gave") {
+			let remotePlayer = entities(parts[1]);
+			let card = strings["card_"+parts[2]];
+			if (parts[0] == "favour_recv") {
+				this.console(remotePlayer + " gave you <span style='color:orange'>" + card + "</span>.");
+				cardHUD(parts[2], 2000);
+			} else {
+				this.console("You gave " + remotePlayer + " <span style='color:orange'>" + card + "</span>.");
+			}
+			return;
+		}
+
+		if (parts[0] == "lock") {
+			this.locked = true;
+			return;
+		}
+		if (parts[0] == "unlock") {
+			this.locked = false;
 			return;
 		}
 

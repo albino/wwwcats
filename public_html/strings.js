@@ -25,5 +25,6 @@ var strings = {
 	"bcast_new_game": "<span style='color:yellow'>A new game has started.</span>",
 	"bcast_no_nope": "Nope! There is nothing to Nope!",
 	"must_defuse": "<span style='color:purple'>You must defuse the Detonating Cat.</span>",
-	"question_defuse_pos": "Where should the Detonating Cat be placed in the deck? (0 = on top)"
+	"question_defuse_pos": "Where should the Detonating Cat be placed in the deck? (0 = on top)",
+	"question_favour_who": "Who do you want to ask for a favour? (case-sensitive, I'm still working on a better interface for this, sorry)"
 };

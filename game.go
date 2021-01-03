@@ -24,9 +24,11 @@ type Game struct {
 	currentPlayer int
 
 	// Various game-related variables
-	started  bool
-	defusing bool
-	attack   bool
+	started   bool
+	defusing  bool
+	attack    bool
+	favouring *Client // Who is asking for a favour?
+	favoured  *Client // Who is being asked for a favour?
 
 	deck  *Deck
 	hands map[*Client]*Hand
@@ -68,6 +70,16 @@ func (g *Game) playerNumber(client *Client) (num int) {
 	for i, _ := range g.players {
 		if g.players[i] == client {
 			num = i
+			break
+		}
+	}
+	return
+}
+
+func (g *Game) playerByName(name string) (player *Client) {
+	for _, thisPlayer := range g.players {
+		if thisPlayer.name == name {
+			player = thisPlayer
 			break
 		}
 	}
@@ -255,6 +267,11 @@ func (g *Game) readFromClient(c *Client, msg string) {
 			break
 		}
 
+		if g.favouring != nil {
+			c.sendMsg("err illegal_move")
+			break
+		}
+
 		card, err := strconv.Atoi(fields[1])
 		if err != nil {
 			c.sendMsg("err illegal_move")
@@ -277,6 +294,8 @@ func (g *Game) readFromClient(c *Client, msg string) {
 			break
 		}
 
+		g.favouring = nil
+		g.favoured = nil
 		g.hands[c].removeCard(card)
 		c.sendMsg("hand" + g.hands[c].cardList())
 		g.playsCard(c, cardText)
@@ -292,6 +311,8 @@ func (g *Game) readFromClient(c *Client, msg string) {
 func (g *Game) drawCard(c *Client) {
 	card := g.deck.draw()
 	g.history = nil
+	g.favouring = nil
+	g.favoured = nil
 
 	if card == "exploding" {
 		g.lobby.sendBcast("exploded " + c.name)
@@ -331,6 +352,9 @@ func (g *Game) playsCard(player *Client, card string) {
 			return
 		}
 		player.sendMsg("q defuse_pos")
+	case "favour":
+		g.favouring = player
+		player.sendMsg("q favour_who")
 	case "shuffle":
 		g.history = makeGameState(g)
 		g.deck.shuffle()
@@ -372,28 +396,79 @@ func (g *Game) answersQuestion(player *Client, question string, answer string) {
 	switch question {
 	case "defuse_pos":
 		if !g.defusing {
-			return
+			break
 		}
 
 		if g.players[g.currentPlayer] != player {
-			return
+			break
 		}
 
 		pos, err := strconv.Atoi(answer)
 		if err != nil {
 			player.sendMsg("q " + question)
-			return
+			break
 		}
 
 		if pos > g.deck.cardsLeft() {
 			player.sendMsg("q " + question)
-			return
+			break
 		}
 
 		g.deck.insertAtPos(pos, "exploding")
 		g.defusing = false
 		g.incrementTurn()
 		g.nextTurn()
+	case "favour_who":
+		if g.favouring != player {
+			break
+		}
+
+		target := g.playerByName(answer)
+		if target == nil || target == player {
+			player.sendMsg("q " + question)
+			break
+		}
+
+		g.favoured = target
+		g.lobby.sendComplexBcast("favoured "+player.name+" "+target.name, map[*Client]bool{target: true})
+		target.sendMsg("q favour_what "+player.name)
+		player.sendMsg("lock") // block further play until the transaction completes
+	case "favour_what":
+		if g.favoured != player {
+			player.sendMsg("err illegal_move")
+			break
+		}
+
+		card, err := strconv.Atoi(answer)
+		if err != nil {
+			player.sendMsg("err illegal_move")
+			break
+		}
+
+		if card >= g.hands[player].getLength() {
+			player.sendMsg("err illegal_move")
+			break
+		}
+
+		cardText := g.hands[player].getCard(card)
+
+		// TODO: prevent favouring a nope
+		// this is harder than it seems and will require some changes in the game's logic...
+
+		g.hands[player].removeCard(card)
+		player.sendMsg("hand" + g.hands[player].cardList())
+
+		g.hands[g.favouring].addCard(cardText)
+		g.favouring.sendMsg("hand" + g.hands[g.favouring].cardList())
+
+		// The favour transaction is complete
+		g.favouring.sendMsg("unlock")
+		g.favouring.sendMsg("favour_recv " + g.favoured.name + " " + cardText)
+		g.favoured.sendMsg("favour_gave " + g.favouring.name + " " + cardText)
+		g.lobby.sendComplexBcast("favour_complete "+g.favouring.name+" "+g.favoured.name,
+			map[*Client]bool{g.favoured: true, g.favouring: true})
+		g.favouring = nil
+		g.favoured = nil
 	default:
 		log.Println("unexpected Q/A: ", question, answer)
 	}

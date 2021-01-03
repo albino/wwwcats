@@ -161,6 +161,8 @@ type GameState struct {
 	deck          Deck
 	currentPlayer int
 	attack        bool
+	favouring     *Client
+	favoured      *Client
 }
 
 func makeGameState(g *Game) *GameState {
@@ -174,6 +176,8 @@ func makeGameState(g *Game) *GameState {
 		},
 		currentPlayer: g.currentPlayer,
 		attack:        g.attack,
+		favouring:     g.favouring,
+		favoured:      g.favoured,
 	}
 }
 
@@ -181,4 +185,6 @@ func (gs *GameState) restore(g *Game) {
 	g.deck = &gs.deck
 	g.currentPlayer = gs.currentPlayer
 	g.attack = gs.attack
+	g.favouring = gs.favouring
+	g.favoured = gs.favoured
 }
