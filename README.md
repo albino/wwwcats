@@ -20,8 +20,7 @@ is the game server binary and the corresponding static client bundle.
 
   * I designed everything myself, including drawing the cards. I have no idea about user interface design,
   so the whole thing feels a bit early-2000s.
-  * The game has not been well-tested. It might not work on Windows. I made this for fun, and there are
-  probably bugs. You've been warned!
+  * The game has not been well-tested. I made this for fun, and there are probably bugs. You've been warned!
   * If you're interested in improving any aspect of the game, contributions are very welcome. Please open an
   issue or pull request on GitHub!
 
