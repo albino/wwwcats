@@ -8,6 +8,7 @@ var GameState = function() {
 	this.ourTurn = false;
 	this.locked = false;
 	this.favouring = false;
+	this.combo = 1;
 
 	// Player and lobby name
 
@@ -20,6 +21,14 @@ var GameState = function() {
 
 	this.loadImage = function(img) {
 		this.images.push(img);
+	}
+
+	this.resetButtons = function() {
+		let buttons = $(".combo-btn").toArray();
+		buttons.forEach(function(btn) {
+			$(btn).removeClass("active");
+		});
+		this.combo = 1;
 	}
 
 	this.start = function() {
@@ -62,6 +71,28 @@ var GameState = function() {
 				if (gameState.ourTurn) {
 					gameState.send("draw");
 				}
+			});
+		})(this);
+
+		// 2x and 3x buttons
+		(function(gameState) {
+			let buttons = $(".combo-btn").toArray();
+			buttons.forEach(function(btn) {
+				$(btn).on("click", function() {
+					// deactive all the buttons, except this one
+					buttons.forEach(function(b) {
+						if (b != btn) {
+							$(b).removeClass("active");
+						}
+					});
+					$(this).toggleClass("active");
+
+					if ($(this).hasClass("active")) {
+						gameState.combo = $(this).attr("id") == "2x-button" ? 2 : 3;
+					} else {
+						gameState.combo = 0;
+					}
+				});
 			});
 		})(this);
 
@@ -239,9 +270,35 @@ var GameState = function() {
 							return;
 						}
 
-						// TODO: check whether it's ok to play this card or if we are throwing it away
-						if (gameState.ourTurn || cardName === "nope") {
+						if (gameState.combo > 1) {
+							// Do we have enough cards?
+							let cards = 0;
+							for (var j=1; j < parts.length; j++) {
+								if (parts[j] == cardName) {
+									cards++;
+									if (cards == gameState.combo) {
+										break;
+									}
+								}
+							}
+							if (cards < gameState.combo) {
+								gameState.console("You don't have enough " + strings["card_"+cardName] +
+									" cards to do that!");
+								return;
+							}
+
+							if (gameState.ourTurn) {
+								gameState.send("play_multiple "+gameState.combo.toString()+" "+
+									cardName);
+								gameState.resetButtons();
+								return;
+							}
+						}
+
+						if ((gameState.ourTurn || cardName === "nope") && !cardName.startsWith("random")
+								&& (cardName !== "defuse" || gameState.defusing)) {
 							gameState.send("play "+cardNo.toString());
+							gameState.defusing = false;
 						}
 					});
 				})(this, i-1, parts[i]);
@@ -336,6 +393,21 @@ var GameState = function() {
 			return;
 		}
 
+		if (parts[0] == "played_multiple") {
+			let encoded = entities(parts[1]);
+			this.console(encoded+" played "+parts[2]+"x "+strings["card_"+parts[3]]+".");
+
+			$("#discard-pile").html("<img class='card' src='assets/card_"+parts[3]+".png' />");
+
+			if (parts[2] == 2) {
+				cardHUD3([parts[3], parts[3]], 1000);
+			} else {
+				cardHUD3([parts[3], parts[3], parts[3]], 1000);
+			}
+
+			return;
+		}
+
 		if (parts[0] == "no_discard") {
 			$("#discard-pile").html("");
 			return;
@@ -355,6 +427,9 @@ var GameState = function() {
 			this.send("a "+parts[1]+" "+ans);
 
 			return;
+		}
+		if (parts[0] == "q_cancel") {
+			this.favouring = false;
 		}
 
 		if (parts[0] == "seen") {
@@ -384,6 +459,37 @@ var GameState = function() {
 				this.console("You gave " + remotePlayer + " <span style='color:orange'>" + card + "</span>.");
 			}
 			return;
+		}
+
+		if (parts[0] == "randomed") {
+			let perpetrator = entities(parts[1]);
+			let victim = entities(parts[2]);
+			this.console(perpetrator+" took a random card from "+victim+".");
+			return;
+		}
+		if (parts[0] == "random_recv" || parts[0] == "random_gave") {
+			let remotePlayer = entities(parts[1]);
+			let card = strings["card_"+parts[2]];
+			if (parts[0] == "random_recv") {
+				this.console("You randomly took <span style='color:orange'>"+card+"</span> from "+
+					remotePlayer+".");
+			} else {
+				this.console(remotePlayer+" randomly took <span style='color:orange'>"+card+
+					"</span> from you.");
+			}
+			cardHUD(parts[2], 2000);
+			return;
+		}
+
+		if (parts[0] == "steal_n" || parts[0] == "steal_y") {
+			let perpetrator = entities(parts[1]);
+			let victim = entities(parts[2]);
+			if (parts[0] == "steal_y") {
+				this.console(perpetrator+" stole "+strings["card_"+parts[3]]+" from "+victim+"!");
+			} else {
+				this.console(perpetrator+" asked "+victim+" for "+strings["card_"+parts[3]]+
+					", but ended up empty-handed!");
+			}
 		}
 
 		if (parts[0] == "lock") {

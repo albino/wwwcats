@@ -29,6 +29,8 @@ type Game struct {
 	attack    bool
 	favouring *Client // Who is asking for a favour?
 	favoured  *Client // Who is being asked for a favour?
+	favourType int // !! not reset !!
+	// 1 - favour, 2 - random, 3 - steal
 
 	deck  *Deck
 	hands map[*Client]*Hand
@@ -128,6 +130,22 @@ func (g *Game) downgradePlayer(client *Client) {
 		go g.wins(g.players[0])
 		return
 	}
+
+	if g.favouring == client {
+		g.favoured.sendMsg("q_cancel")
+		g.favouring = nil
+		g.favoured = nil
+	}
+	if g.favoured == client && g.favourType == 1 {
+		// The favour is cancelled
+		g.lobby.sendBcast("bcast favour_cancel")
+		g.favouring.sendMsg("unlock")
+		g.favouring = nil
+		g.favoured = nil
+	}
+	// for favourType 2, it is instant - this can't happen
+	// for favourType 3, we are waiting on a response from the player ASKING
+	// (so we can deal with it in answersQuestion)
 
 	// If they are currently playing, advance to the next player
 	if currentlyPlaying && len(g.players) > 0 {
@@ -300,6 +318,40 @@ func (g *Game) readFromClient(c *Client, msg string) {
 		c.sendMsg("hand" + g.hands[c].cardList())
 		g.playsCard(c, cardText)
 
+	case "play_multiple":
+		_, ok := g.spectators[c]
+		if ok {
+			break
+		}
+
+		if g.currentPlayer >= len(g.players) {
+			break
+		}
+
+		if g.favouring != nil {
+			c.sendMsg("err illegal_move")
+			break
+		}
+
+		num, err := strconv.Atoi(fields[1])
+		if err != nil || num > 3 || num < 2 {
+			c.sendMsg("err illegal_move")
+			break
+		}
+
+		if !g.hands[c].containsMultiple(fields[2], num) {
+			c.sendMsg("err illegal_move")
+			break
+		}
+
+		g.favouring = nil
+		g.favoured = nil
+		for i := 0; i < num; i++ {
+			g.hands[c].removeByName(fields[2])
+		}
+		c.sendMsg("hand" + g.hands[c].cardList())
+		g.playsCombo(c, fields[2], num)
+
 	case "a":
 		g.answersQuestion(c, fields[1], fields[2])
 
@@ -354,6 +406,7 @@ func (g *Game) playsCard(player *Client, card string) {
 		player.sendMsg("q defuse_pos")
 	case "favour":
 		g.favouring = player
+		g.favourType = 1
 		player.sendMsg("q favour_who")
 	case "shuffle":
 		g.history = makeGameState(g)
@@ -389,6 +442,26 @@ func (g *Game) playsCard(player *Client, card string) {
 		g.history = nil
 	default:
 		log.Println("unhandled card: ", card)
+	}
+}
+
+func (g *Game) playsCombo(player *Client, card string, num int) {
+	g.lobby.sendBcast("played_multiple " + player.name + " " + strconv.Itoa(num) + " " + card)
+
+	g.history = nil // TODO
+
+	if num == 2 {
+		// 2 of a kind - random card
+		g.favouring = player
+		g.favourType = 2
+		player.sendMsg("q random_who")
+	} else if num == 3 {
+		// 3 of a kind - 'stealing' a card
+		g.favouring = player
+		g.favourType = 3
+		player.sendMsg("q steal_who")
+	} else {
+		log.Fatal("what the chuff??")
 	}
 }
 
@@ -433,6 +506,43 @@ func (g *Game) answersQuestion(player *Client, question string, answer string) {
 		g.lobby.sendComplexBcast("favoured "+player.name+" "+target.name, map[*Client]bool{target: true})
 		target.sendMsg("q favour_what " + player.name)
 		player.sendMsg("lock") // block further play until the transaction completes
+	case "random_who":
+		if g.favouring != player {
+			break
+		}
+
+		target := g.playerByName(answer)
+		if target == nil || target == player {
+			player.sendMsg("q " + question)
+			break
+		}
+
+		// removes the card from the target's hand
+		card := g.hands[target].takeRandom()
+
+		g.lobby.sendComplexBcast("randomed "+player.name+" "+target.name,
+			map[*Client]bool{target: true, player: true})
+		target.sendMsg("random_gave "+player.name+" "+card)
+		player.sendMsg("random_recv "+target.name+" "+card)
+
+		g.hands[player].addCard(card)
+		player.sendMsg("hand" + g.hands[player].cardList())
+		target.sendMsg("hand" + g.hands[target].cardList())
+		g.favouring = nil
+		g.favoured = nil
+	case "steal_who":
+		if g.favouring != player {
+			break
+		}
+
+		target := g.playerByName(answer)
+		if target == nil || target == player {
+			player.sendMsg("q " + question)
+			break
+		}
+
+		g.favoured = target
+		player.sendMsg("q steal_what")
 	case "favour_what":
 		if g.favoured != player {
 			player.sendMsg("err illegal_move")
@@ -467,6 +577,32 @@ func (g *Game) answersQuestion(player *Client, question string, answer string) {
 		g.favoured.sendMsg("favour_gave " + g.favouring.name + " " + cardText)
 		g.lobby.sendComplexBcast("favour_complete "+g.favouring.name+" "+g.favoured.name,
 			map[*Client]bool{g.favoured: true, g.favouring: true})
+		g.favouring = nil
+		g.favoured = nil
+	case "steal_what":
+		if g.favouring != player || g.favoured == nil {
+			break
+		}
+
+		if g.playerNumber(g.favoured) == -1 {
+			// The player being asked has left :(
+			player.sendMsg("q " + question)
+			break
+		}
+
+		if !g.hands[g.favoured].contains(answer) {
+			g.lobby.sendBcast("steal_n "+g.favouring.name+" "+g.favoured.name+" "+answer)
+			break
+		} else {
+			g.hands[g.favoured].removeByName(answer)
+			g.favoured.sendMsg("hand" + g.hands[g.favoured].cardList())
+
+			g.hands[player].addCard(answer)
+			player.sendMsg("hand" + g.hands[g.favouring].cardList())
+
+			g.lobby.sendBcast("steal_y "+g.favouring.name+" "+g.favoured.name+" "+answer)
+		}
+
 		g.favouring = nil
 		g.favoured = nil
 	default:

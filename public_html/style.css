@@ -202,3 +202,15 @@ div#card-hud-3 > img.card {
 div#card-hud-3 > img.card:last-child {
 	margin-right: 0;
 }
+
+div#buttons-container {
+	position: absolute;
+	top: 830px;
+	left: 20px;
+}
+button.combo-btn.active::before {
+	content: "[[ ";
+}
+button.combo-btn.active::after {
+	content: " ]]";
+}

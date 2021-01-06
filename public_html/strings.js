@@ -24,7 +24,11 @@ var strings = {
 	"bcast_starting": "<span style='color:yellow'>The game is starting!</span>",
 	"bcast_new_game": "<span style='color:yellow'>A new game has started.</span>",
 	"bcast_no_nope": "Nope! There is nothing to Nope!",
+	"bcast_favour_cancel": "The favour was cancelled.",
 	"must_defuse": "<span style='color:purple'>You must defuse the Detonating Cat.</span>",
 	"question_defuse_pos": "Where should the Detonating Cat be placed in the deck? (0 = on top)",
-	"question_favour_who": "Who do you want to ask for a favour? (case-sensitive, I'm still working on a better interface for this, sorry)"
+	"question_favour_who": "Who do you want to ask for a favour? (case-sensitive, I'm still working on a better interface for this, sorry)",
+	"question_random_who": "Who would you like to ask for a random card? (case-sensitive, I'm still working on a better interface for this, sorry)",
+	"question_steal_who": "Who would you like to steal a card from? (case-sensitive, I'm still working on a better interface for this, sorry)",
+	"question_steal_what": "Which card would you like to steal? (all lowercase, I'm still working on a better interface for this, sorry)"
 };

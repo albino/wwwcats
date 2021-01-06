@@ -142,6 +142,15 @@ func (h *Hand) removeCard(num int) {
 	h.cards = append(h.cards[:num], h.cards[num+1:]...)
 }
 
+func (h *Hand) removeByName(wanted string) {
+	for i, card := range h.cards {
+		if card == wanted {
+			h.cards = append(h.cards[:i], h.cards[i+1:]...)
+			return
+		}
+	}
+}
+
 func (h *Hand) contains(wanted string) bool {
 	for _, card := range h.cards {
 		if card == wanted {
@@ -151,8 +160,29 @@ func (h *Hand) contains(wanted string) bool {
 	return false
 }
 
+func (h *Hand) containsMultiple(wanted string, num int) bool {
+	found := 0
+	for _, card := range h.cards {
+		if card == wanted {
+			found += 1
+			if found == num {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func (h *Hand) getLength() int {
 	return len(h.cards)
+}
+
+func (h *Hand) takeRandom() string {
+	rand.Seed(time.Now().UnixNano())
+	cardNo := rand.Intn(len(h.cards))
+	card := h.getCard(cardNo)
+	h.removeCard(cardNo)
+	return card
 }
 
 type GameState struct {
