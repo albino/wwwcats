@@ -244,7 +244,18 @@ func (g *Game) readFromClient(c *Client, msg string) {
 		}
 
 		if len(g.players) < 2 {
+			c.sendMsg("bcast min_players")
 			break
+		}
+
+		if len(g.players) > 6 {
+			g.lobby.sendBcast("bcast max_players")
+			break
+		}
+
+		if len(g.players) == 6 {
+			// Warning message
+			g.lobby.sendBcast("bcast high_players")
 		}
 
 		g.start()
@@ -650,8 +661,6 @@ func (g *Game) nextTurn() {
 
 func (g *Game) start() {
 	// Starts the game
-
-	// TODO: maximum no of players
 
 	g.started = true
 
