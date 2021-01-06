@@ -485,10 +485,12 @@ var GameState = function() {
 			let perpetrator = entities(parts[1]);
 			let victim = entities(parts[2]);
 			if (parts[0] == "steal_y") {
-				this.console(perpetrator+" stole "+strings["card_"+parts[3]]+" from "+victim+"!");
+				this.console(perpetrator+" stole <span style='color:orange'>"+
+					strings["card_"+parts[3]]+"</span> from "+victim+"!");
+				cardHUD(parts[3], 2000);
 			} else {
-				this.console(perpetrator+" asked "+victim+" for "+strings["card_"+parts[3]]+
-					", but ended up empty-handed!");
+				this.console(perpetrator+" asked "+victim+" for <span style='color:orange'>"
+					+strings["card_"+parts[3]]+"</span>, but ended up empty-handed!");
 			}
 		}
 
