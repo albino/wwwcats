@@ -13,9 +13,26 @@ div#loading, div#welcome {
 div#welcome > p {
 	margin-bottom: 10px;
 }
+td.welcome-pane {
+	padding: 20px;
+	height: 300px;
+}
+td.welcome-pane > h1 {
+	font-size: 20px;
+	margin-bottom: 10px;
+}
+table#login-form {
+	margin-bottom: 10px;
+}
 
-html, body {
-	height: 100%;
+iframe#changelog {
+	height: 100%
+}
+body.changelog {
+	padding: 10px;
+}
+p.changelog-entry {
+	line-height: 1.6;
 }
 
 div#game-view {

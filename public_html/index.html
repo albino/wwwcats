@@ -14,19 +14,28 @@
 		</div>
 
 		<div id="welcome" class="reveal">
-			<p>Welcome to DETONATING CATS</p>
 			<table>
 				<tr>
-					<td><label for="welcome-username">Your name:</label></td>
-					<td><input id="welcome-username" placeholder="Dunce" /></td>
-				</tr>
-				<tr>
-					<td><label for="welcome-lobby">Lobby name:</label></td>
-					<td><input id="welcome-lobby" placeholder="chuff" /></td>
+					<td class="welcome-pane">
+						<h1>Welcome to DETONATING CATS <small>(beta)</small></h1>
+						<table id="login-form">
+							<tr>
+								<td><label for="welcome-username">Your name:</label></td>
+								<td><input id="welcome-username" placeholder="Dunce" /></td>
+							</tr>
+							<tr>
+								<td><label for="welcome-lobby">Lobby name:</label></td>
+								<td><input id="welcome-lobby" placeholder="chuff" /></td>
+							</tr>
+						</table>
+						<button id="welcome-join">Join!</button>
+					</td>
+					<td class="welcome-pane">
+						<h1>Changelog</h1>
+						<iframe src="changelog.html" id="changelog"></iframe>
+					</td>
 				</tr>
 			</table>
-			<br />
-			<button id="welcome-join">Join!</button>
 		</div>
 
 		<div id="game-view" class="reveal">
