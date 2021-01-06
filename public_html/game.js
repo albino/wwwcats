@@ -96,6 +96,13 @@ var GameState = function() {
 			});
 		})(this);
 
+		// Sort button
+		(function(gameState) {
+			$("#sort-button").on("click", function() {
+				gameState.send("sort");
+			});
+		})(this);
+
 		window.onbeforeunload = function () {
 			return ""; // Display confirmation message
 		};
@@ -492,6 +499,7 @@ var GameState = function() {
 				this.console(perpetrator+" asked "+victim+" for <span style='color:orange'>"
 					+strings["card_"+parts[3]]+"</span>, but ended up empty-handed!");
 			}
+			return;
 		}
 
 		if (parts[0] == "lock") {

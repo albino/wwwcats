@@ -355,6 +355,14 @@ func (g *Game) readFromClient(c *Client, msg string) {
 	case "a":
 		g.answersQuestion(c, fields[1], fields[2])
 
+	case "sort":
+		_, ok := g.spectators[c]
+		if ok {
+			break
+		}
+		g.hands[c].sort()
+		c.sendMsg("hand" + g.hands[c].cardList())
+
 	default:
 		log.Println("Uncaught message from", c.name+":", msg)
 	} // End switch

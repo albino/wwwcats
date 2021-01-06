@@ -3,6 +3,7 @@ package main
 import (
 	"math/rand"
 	"time"
+	"sort"
 )
 
 type Deck struct {
@@ -183,6 +184,27 @@ func (h *Hand) takeRandom() string {
 	card := h.getCard(cardNo)
 	h.removeCard(cardNo)
 	return card
+}
+
+func (h *Hand) sort() {
+	weights := map[string]int{
+		"defuse": 10,
+		"nope": 20,
+		"skip": 30,
+		"attack": 40,
+		"see3": 50,
+		"shuffle": 60,
+		"favour": 70,
+		"random1": 80,
+		"random2": 90,
+		"random3": 100,
+		"random4": 110,
+		"random5": 120,
+	}
+
+	sort.Slice(h.cards, func (a, b int) bool {
+		return weights[h.cards[a]] < weights[h.cards[b]]
+	})
 }
 
 type GameState struct {
