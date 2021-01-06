@@ -371,6 +371,9 @@ func (g *Game) readFromClient(c *Client, msg string) {
 		if ok {
 			break
 		}
+		if !g.started {
+			break
+		}
 		g.hands[c].sort()
 		c.sendMsg("hand" + g.hands[c].cardList())
 
