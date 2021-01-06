@@ -88,6 +88,11 @@
 			gameState.conn.send("join_lobby " + gameState.lobby + " " + gameState.name);
 		}
 
+		gameState.conn.onclose = function () {
+			alert(strings["conn_closed"]);
+			location.reload();
+		};
+
 		gameState.conn.onmessage = function(ev) {
 			// We wrap this in an anonymous function so that 'this'
 			// will refer to the GameState object and not the WebSocket

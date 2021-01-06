@@ -33,5 +33,6 @@ var strings = {
 	"question_favour_who": "Who do you want to ask for a favour? (case-sensitive, I'm still working on a better interface for this, sorry)",
 	"question_random_who": "Who would you like to ask for a random card? (case-sensitive, I'm still working on a better interface for this, sorry)",
 	"question_steal_who": "Who would you like to steal a card from? (case-sensitive, I'm still working on a better interface for this, sorry)",
-	"question_steal_what": "Which card would you like to steal? (all lowercase, I'm still working on a better interface for this, sorry)"
+	"question_steal_what": "Which card would you like to steal? (all lowercase, I'm still working on a better interface for this, sorry)",
+	"conn_closed": "The connection to the server was lost."
 };

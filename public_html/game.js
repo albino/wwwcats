@@ -103,9 +103,14 @@ var GameState = function() {
 			});
 		})(this);
 
-		window.onbeforeunload = function () {
-			return ""; // Display confirmation message
-		};
+		(function(gameState) {
+			window.onbeforeunload = function () {
+				if (gameState.conn.readyState !== WebSocket.CLOSED) {
+					gameState.conn.onclose = null;
+					return ""; // Display confirmation message
+				}
+			};
+		})(this);
 
 		this.console("<span style='color:yellow'>Welcome to Detonating Cats!</span>");
 
