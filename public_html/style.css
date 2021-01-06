@@ -3,7 +3,7 @@
 	font-family: sans-serif;
 }
 
-div.reveal {
+.reveal {
 	display: none;
 }
 
@@ -143,6 +143,15 @@ span#message {
 	height: 250px;
 	border-radius: 10px;
 	border: 5px solid white;
+}
+
+span#draw-pile-counter {
+	position: absolute;
+	top: 415px;
+	right: 115px;
+	width: 185px;
+	color: white;
+	text-shadow: 1px 1px 1px #222;
 }
 
 div#sidebar {

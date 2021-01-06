@@ -318,10 +318,16 @@ var GameState = function() {
 
 		if (ev.data == "draw_pile yes") {
 			$("#draw-pile").html("<img class='card' src='assets/card_back.png' />");
+			$("#draw-pile-counter").removeClass("reveal");
 			return;
 		}
 		if (ev.data == "draw_pile no") {
 			$("#draw-pile").html("");
+			$("#draw-pile-counter").addClass("reveal");
+			return;
+		}
+		if (parts[0] == "cards_left") {
+			$("#remaining-card-count").text(parts[1]);
 			return;
 		}
 

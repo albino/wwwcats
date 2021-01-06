@@ -385,6 +385,8 @@ func (g *Game) drawCard(c *Client) {
 	g.favouring = nil
 	g.favoured = nil
 
+	g.lobby.sendBcast("cards_left "+strconv.Itoa(g.deck.cardsLeft()))
+
 	if card == "exploding" {
 		g.lobby.sendBcast("exploded " + c.name)
 
@@ -508,6 +510,7 @@ func (g *Game) answersQuestion(player *Client, question string, answer string) {
 
 		g.deck.insertAtPos(pos, "exploding")
 		g.defusing = false
+		g.lobby.sendBcast("cards_left "+strconv.Itoa(g.deck.cardsLeft()))
 		g.incrementTurn()
 		g.nextTurn()
 	case "favour_who":
@@ -692,4 +695,5 @@ func (g *Game) start() {
 		player.sendMsg("hand" + g.hands[player].cardList())
 	}
 	g.lobby.sendBcast("draw_pile yes")
+	g.lobby.sendBcast("cards_left "+strconv.Itoa(g.deck.cardsLeft()))
 }
