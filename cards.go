@@ -122,8 +122,6 @@ type Hand struct {
 }
 
 func (h *Hand) cardList() (list string) {
-	// TODO sorting
-
 	for _, card := range h.cards {
 		list = list + " " + card
 	}
