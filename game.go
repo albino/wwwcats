@@ -292,6 +292,10 @@ func (g *Game) readFromClient(c *Client, msg string) {
 			break
 		}
 
+		if len(fields) != 2 {
+			break
+		}
+
 		if g.currentPlayer >= len(g.players) {
 			break
 		}
@@ -335,6 +339,10 @@ func (g *Game) readFromClient(c *Client, msg string) {
 			break
 		}
 
+		if len(fields) != 3 {
+			break
+		}
+
 		if g.currentPlayer >= len(g.players) {
 			break
 		}
@@ -364,6 +372,13 @@ func (g *Game) readFromClient(c *Client, msg string) {
 		g.playsCombo(c, fields[2], num)
 
 	case "a":
+		if len(fields) != 3 {
+			if len(fields) == 2 {
+				c.sendMsg("q "+fields[1])
+			}
+			break
+		}
+
 		g.answersQuestion(c, fields[1], fields[2])
 
 	case "sort":
@@ -543,6 +558,7 @@ func (g *Game) answersQuestion(player *Client, question string, answer string) {
 		}
 
 		// removes the card from the target's hand
+		// TODO: what if they have no cards?
 		card := g.hands[target].takeRandom()
 
 		g.lobby.sendComplexBcast("randomed "+player.name+" "+target.name,
