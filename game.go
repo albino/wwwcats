@@ -559,7 +559,15 @@ func (g *Game) answersQuestion(player *Client, question string, answer string) {
 		}
 
 		// removes the card from the target's hand
-		// TODO: what if they have no cards?
+
+		// what if they have no cards?
+		if g.hands[target].getLength() == 0 {
+			g.lobby.sendBcast("random_n "+player.name+" "+target.name)
+			g.favouring = nil
+			g.favoured = nil
+			break
+		}
+
 		card := g.hands[target].takeRandom()
 
 		g.lobby.sendComplexBcast("randomed "+player.name+" "+target.name,

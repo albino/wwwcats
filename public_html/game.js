@@ -479,10 +479,16 @@ var GameState = function() {
 			return;
 		}
 
-		if (parts[0] == "randomed") {
+		if (parts[0] == "randomed" || parts[0] == "random_n") {
 			let perpetrator = entities(parts[1]);
 			let victim = entities(parts[2]);
-			this.console(perpetrator+" took a random card from "+victim+".");
+			if (parts[0] == "randomed") {
+				this.console(perpetrator+" took a random card from "+victim+".");
+			} else {
+				this.console(perpetrator+" asked "+victim+
+					" for a random card, but they had nothing to give away!");
+			}
+
 			return;
 		}
 		if (parts[0] == "random_recv" || parts[0] == "random_gave") {
