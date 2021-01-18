@@ -301,7 +301,8 @@ func (g *Game) readFromClient(c *Client, msg string) {
 		}
 
 		if g.favouring != nil {
-			c.sendMsg("err illegal_move")
+			// There is a case where it would be legal to play
+			// NOPE here - TODO
 			break
 		}
 
