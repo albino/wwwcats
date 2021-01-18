@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"strings"
 )
 
@@ -12,10 +11,6 @@ type Lobby struct {
 	clients    map[*Client]bool
 	register   chan *Client
 	unregister chan *Client
-
-	// Broadcast
-	bcast        chan []byte
-	complexBcast chan *ComplexBcast
 
 	currentGame *Game
 }
@@ -30,8 +25,6 @@ func newLobby(name string) (lobby *Lobby) {
 
 		register:     make(chan *Client, 64),
 		unregister:   make(chan *Client, 64),
-		bcast:        make(chan []byte, 64),
-		complexBcast: make(chan *ComplexBcast, 64),
 	}
 	lobby.currentGame = newGame(lobby)
 	return
@@ -63,30 +56,6 @@ func (l *Lobby) run(lobbies map[string]*Lobby) {
 				// The lobby is finished
 				delete(lobbies, l.name)
 				return
-			}
-
-		case bytes := <-l.bcast:
-			for client := range l.clients {
-				select {
-				case client.send <- bytes:
-				default:
-					l.unregister <- client
-				}
-			}
-
-		case bcast := <-l.complexBcast:
-			for client := range l.clients {
-				_, ok := bcast.except[client]
-				if ok {
-					// This client is in the exception list
-					continue
-				}
-
-				select {
-				case client.send <- []byte(bcast.text):
-				default:
-					l.unregister <- client
-				}
 			}
 
 		}
@@ -139,28 +108,30 @@ func (l *Lobby) readFromClient(c *Client, msg string) {
 }
 
 func (l *Lobby) sendBcast(msg string) {
-	select {
-	case l.bcast <- []byte(msg):
-	default:
-		log.Fatal("failed to broadcast message", msg)
-	}
-}
+	bytes := []byte(msg)
 
-type ComplexBcast struct {
-	// We use this type when we need to send a message to all clients _except_ one
-	except map[*Client]bool
-	text   string
+	for client := range l.clients {
+		select {
+		case client.send <- bytes:
+		default:
+			l.unregister <- client
+		}
+	}
 }
 
 func (l *Lobby) sendComplexBcast(text string, except map[*Client]bool) {
-	bcast := &ComplexBcast{
-		except: except,
-		text:   text,
-	}
+	bytes := []byte(text)
 
-	select {
-	case l.complexBcast <- bcast:
-	default:
-		log.Fatal("failed to broadcast complex message", bcast.text)
+	for client := range l.clients {
+		_, ok := except[client]
+		if ok {
+			continue
+		}
+
+		select {
+		case client.send <- bytes:
+		default:
+			l.unregister <- client
+		}
 	}
 }
