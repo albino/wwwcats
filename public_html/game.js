@@ -15,6 +15,9 @@ var GameState = function() {
 	this.name = "";
 	this.lobby = "";
 
+	this.nowPlaying = "";
+	this.players = [];
+
 	// Assets
 
 	this.images = [];
@@ -129,6 +132,19 @@ var GameState = function() {
 		$("#game-log").scrollTop($("#game-log")[0].scrollHeight);
 	}
 
+	this.drawPlayerList = function() {
+		$("#player-list").empty();
+		this.players.forEach(x => $("#player-list").append("<li>"+x+"</li>"));
+
+		(function(gameState) {
+			$("#player-list > li").each( function() {
+				if ($( this ).html() == gameState.nowPlaying) {
+					$( this ).append("<span id='now-playing-mark' style='color:red'> *</span>");
+				}
+			} );
+		})(this);
+	}
+
 	this.readFromServer = function(ev) {
 		var parts = ev.data.split(" ");
 
@@ -169,12 +185,8 @@ var GameState = function() {
 
 		if (parts[0] == "players") {
 			// Update players list
-			$("#player-list").empty();
-
-			for (var i=1; i < parts.length; i++) {
-				let encoded = entities(parts[i]);
-				$("#player-list").append("<li>"+encoded+"</li>");
-			}
+			this.players = parts.slice(1).map(x => entities(x));
+			this.drawPlayerList();
 
 			return;
 		}
@@ -341,17 +353,12 @@ var GameState = function() {
 		}
 
 		if (parts[0] == "now_playing") {
-			let encoded = entities(parts[1]);
-			this.console("<span style='color:yellow'>It is "+encoded+"'s turn.</span>");
+			this.nowPlaying = entities(parts[1]);
+			this.console("<span style='color:yellow'>It is "+this.nowPlaying+"'s turn.</span>");
 
-			$("#now-playing-mark").remove();
+			this.drawPlayerList();
 
-			$("#player-list > li").each( function() {
-				if ($( this ).html() == encoded) {
-					$( this ).append("<span id='now-playing-mark' style='color:red'> *</span>");
-				}
-			} );
-
+			// cmp with raw data because name isn't stored encoded
 			if (parts[1] == this.name) {
 				this.ourTurn = true;
 			} else {
@@ -393,6 +400,7 @@ var GameState = function() {
 			this.ourTurn = false;
 			let encoded = entities(parts[1]);
 			this.console("<span style='color:deepskyblue'>"+encoded+" won!</span>");
+			this.nowPlaying = "";
 			return;
 		}
 
