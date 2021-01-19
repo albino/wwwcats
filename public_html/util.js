@@ -74,8 +74,15 @@ function cardHUD3(cards, time) {
 
 function modalChoice(cb, question, options, exclude, transform) {
 	// NO anti-xss
+	
+	let modalHud = document.createElement("DIV");
+	$(modalHud).addClass("modal-hud");
+	let modal = document.createElement("DIV");
+	$(modal).addClass("modal");
+	$(modal).html("<span>"+question+"</span>");
 
-	$("#modal-text").html(question);
+	let modalOptions = document.createElement("UL");
+	$(modalOptions).addClass("modal-options");
 
 	options.forEach(function (opt) {
 		if (opt === exclude) {
@@ -93,17 +100,19 @@ function modalChoice(cb, question, options, exclude, transform) {
 		button.addEventListener("click", function() {
 			cb(opt);
 
-			$("#modal-hud").css("opacity", "0");
+			$(modalHud).css("opacity", "0");
 			setTimeout(function() {
-				$("#modal-options").empty();
-				$("#modal-hud").addClass("reveal");
+				document.getElementById("modal-container").removeChild(modalHud);
 			}, 500);
 		}, false);
-		document.getElementById("modal-options").appendChild(button);
+		modalOptions.appendChild(button);
 	});
 
-	$("#modal-hud").removeClass("reveal");
+	modal.appendChild(modalOptions);
+	modalHud.appendChild(modal);
+	document.getElementById("modal-container").appendChild(modalHud);
+
 	setTimeout(function() {
-		$("#modal-hud").css("opacity", "1");
+		$(modalHud).css("opacity", "1");
 	}, 100);
 }

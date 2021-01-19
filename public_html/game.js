@@ -455,6 +455,12 @@ var GameState = function() {
 						gameState.send("a "+parts[1]+" "+player);
 					}, strings["question_"+parts[1]], gameState.players, entities(gameState.name), null);
 				})(this);
+			} else if (parts[1] == "steal_what") {
+				(function (gameState) {
+					modalChoice(function(card) {
+						gameState.send("a "+parts[1]+" "+card);
+					}, strings["question_"+parts[1]], cards, null, x => strings["card_"+x]);
+				})(this);
 			} else {
 				ans = prompt(strings["question_"+parts[1]]);
 				this.send("a "+parts[1]+" "+ans);

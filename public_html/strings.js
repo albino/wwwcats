@@ -33,7 +33,23 @@ var strings = {
 	"question_favour_who": "Who do you want to ask for a favour?",
 	"question_random_who": "Who would you like to ask for a random card?",
 	"question_steal_who": "Who would you like to steal a card from?",
-	"question_steal_what": "Which card would you like to steal? (all lowercase, I'm still working on a better interface for this, sorry)",
+	"question_steal_what": "Which card would you like to steal?",
 	"conn_closed": "The connection to the server was lost.",
 	"bad_version": "The game server is running a different version of the game. If this problem persists, please try hard-reloading the page by pressing Ctrl+F5 or clearing your browser cache."
 };
+
+var cards = [
+	"attack",
+	"defuse",
+	"exploding",
+	"favour",
+	"nope",
+	"random1",
+	"random2",
+	"random3",
+	"random4",
+	"random5",
+	"see3",
+	"shuffle",
+	"skip"
+];

@@ -1,4 +1,4 @@
-var REVISION = "6";
+var REVISION = "7";
 
 (function () {
 

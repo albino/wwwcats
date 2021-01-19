@@ -282,6 +282,7 @@ func (g *Game) readFromClient(c *Client, msg string) {
 		}
 
 		if g.defusing {
+			log.Println("Defusing")
 			break
 		}
 
@@ -305,6 +306,7 @@ func (g *Game) readFromClient(c *Client, msg string) {
 		if g.favouring != nil {
 			// There is a case where it would be legal to play
 			// NOPE here - TODO
+			log.Println("Favouring")
 			break
 		}
 
@@ -322,6 +324,7 @@ func (g *Game) readFromClient(c *Client, msg string) {
 		cardText := g.hands[c].getCard(card)
 
 		if g.defusing && cardText != "defuse" {
+			log.Println("Defusing")
 			break
 		}
 
@@ -352,6 +355,10 @@ func (g *Game) readFromClient(c *Client, msg string) {
 
 		if g.favouring != nil {
 			c.sendMsg("err illegal_move")
+			break
+		}
+
+		if g.defusing {
 			break
 		}
 

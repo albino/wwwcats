@@ -3,12 +3,12 @@
 	<head>
 		<meta charset="utf-8" />
 		<title>Detonating Cats</title>
-		<link rel="stylesheet" type="text/css" href="style.css?incr=2" />
+		<link rel="stylesheet" type="text/css" href="style.css?incr=3" />
 	</head>
 	<body>
 		<!-- This is needed for some reason, because in some cases the browser loads
 		a fresh copy of the JS but not the HTML (?!) -->
-		<input type="hidden" id="REVISION" value="6" />
+		<input type="hidden" id="REVISION" value="7" />
 
 		<noscript><h1>You need to enable Javascript</h1></noscript>
 
@@ -80,12 +80,7 @@
 					<div id="card-hud-3"></div>
 				</div>
 
-				<div id="modal-hud" class="reveal">
-					<div id="modal">
-						<span id="modal-text"></span>
-						<ul id="modal-options"></ul>
-					</div>
-				</div>
+				<div id="modal-container"></div>
 			</div> <!-- /board -->
 
 			<div id="buttons-container">

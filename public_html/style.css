@@ -241,7 +241,7 @@ div#card-hud-3 > img.card:last-child {
 	margin-right: 0;
 }
 
-div#modal-hud {
+div.modal-hud {
 	z-index: 1;
 	background-color: rgba(0, 0, 0, 0.5);
 	opacity: 0;
@@ -251,7 +251,7 @@ div#modal-hud {
 	width: 800px;
 	position: absolute;
 }
-div#modal {
+div.modal {
 	background-color: white;
 	color: #333;
 	width: 360px;
@@ -263,11 +263,11 @@ div#modal {
 	padding: 20px;
 	border-radius: 10px;
 }
-ul#modal-options {
+ul.modal-options {
 	margin-top: 10px;
 	padding-left: 0;
 }
-ul#modal-options li {
+ul.modal-options li {
 	list-style: none;
 	padding: 10px;
 	background-color: #a8d9ff;
@@ -278,7 +278,7 @@ ul#modal-options li {
 	margin-bottom: 10px;
 	cursor: pointer;
 }
-ul#modal-options li:hover {
+ul.modal-options li:hover {
 	background-color: #45aeff;
 }
 
