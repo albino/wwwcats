@@ -6,11 +6,16 @@
 		<link rel="stylesheet" type="text/css" href="style.css" />
 	</head>
 	<body>
+		<!-- This is needed for some reason, because in some cases the browser loads
+		a fresh copy of the JS but not the HTML (?!) -->
+		<input type="hidden" id="REVISION" value="4" />
+
 		<noscript><h1>You need to enable Javascript</h1></noscript>
 
 		<div id="loading">
 			<p>Loading assets, please wait.</p>
 			<p><span id="loading-assets">0</span> assets loaded.</p>
+			<p>(If this takes too long, try force-reloading with Ctrl+F5...)</p>
 		</div>
 
 		<div id="welcome" class="reveal">

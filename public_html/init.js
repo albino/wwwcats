@@ -1,4 +1,4 @@
-var REVISION = "3";
+var REVISION = "4";
 
 (function () {
 
@@ -9,6 +9,16 @@ var REVISION = "3";
 
 	$( document ).ready(function () {
 		// Set up the game
+
+		// Check that the JS and HTML have matching versions
+		// (caching is weird)
+		var htmlRev = $("#REVISION").val();
+		if (htmlRev != REVISION) {
+			setTimeout(function() {
+				location.reload();
+			}, 1500);
+			return;
+		}
 
 		// Create the changelog iframe
 		// We use this roundabout method to make sure the changelog is always
