@@ -112,30 +112,18 @@ func (l *Lobby) readFromClient(c *Client, msg string) {
 }
 
 func (l *Lobby) sendBcast(msg string) {
-	bytes := []byte(msg)
-
 	for client := range l.clients {
-		select {
-		case client.send <- bytes:
-		default:
-			l.unregister <- client
-		}
+		client.sendMsg(msg)
 	}
 }
 
 func (l *Lobby) sendComplexBcast(text string, except map[*Client]bool) {
-	bytes := []byte(text)
-
 	for client := range l.clients {
 		_, ok := except[client]
 		if ok {
 			continue
 		}
 
-		select {
-		case client.send <- bytes:
-		default:
-			l.unregister <- client
-		}
+		client.sendMsg(text)
 	}
 }

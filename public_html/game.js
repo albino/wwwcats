@@ -130,8 +130,6 @@ var GameState = function() {
 	}
 
 	this.readFromServer = function(ev) {
-		console.log("<< "+ev.data);
-
 		var parts = ev.data.split(" ");
 
 		// TODO: cleanup and refactor
@@ -538,7 +536,6 @@ var GameState = function() {
 	}
 
 	this.send = function(msg) {
-		console.log(">> "+msg);
 		this.conn.send(msg);
 	}
 }

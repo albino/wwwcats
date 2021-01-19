@@ -10,7 +10,7 @@ import (
 
 var addr = flag.String("l", ":8080", "http service address")
 
-var REVISION = 4
+var REVISION = 5
 
 func main() {
 	flag.Parse()

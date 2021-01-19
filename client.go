@@ -62,12 +62,19 @@ func (c *Client) readPump(lobbies map[string]*Lobby) {
 		if err != nil {
 			// The connection is dead
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("err: %v", err)
+				log.Printf("%s !!! Connection closed (%v)", c.name, err)
 			}
 			break
 		}
 
 		message := string(bytes)
+
+		// Check for badly-formed messages which could do something strange
+		if strings.Contains(message, "\n") || strings.Contains(message, "\r") {
+			continue
+		}
+
+		log.Printf("%s >>> %s", c.name, message)
 
 		// If this client is in a lobby, let the lobby handle the message
 
@@ -111,6 +118,8 @@ func (c *Client) writePump() {
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 
 			if !ok {
+				log.Printf("%s !!! Write channel closed", c.name)
+
 				// Close the channel
 				// I have no idea how this actually works
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
@@ -119,6 +128,7 @@ func (c *Client) writePump() {
 
 			w, err := c.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
+				log.Printf("%s !!! Disconnected on write (%v)", c.name, err)
 				return
 			}
 			w.Write(message)
@@ -133,12 +143,14 @@ func (c *Client) writePump() {
 			*/
 
 			if err := w.Close(); err != nil {
+				log.Printf("%s !!! Couldn't close write (%v)", c.name, err)
 				return
 			}
 
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				log.Printf("%s !!! Ping timeout (%v)", c.name, err)
 				return
 			}
 		}
@@ -146,6 +158,8 @@ func (c *Client) writePump() {
 }
 
 func (c *Client) sendMsg(message string) {
+	log.Printf("%s <<< %s", c.name, message)
+
 	select {
 	case c.send <- []byte(message):
 	default:

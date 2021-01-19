@@ -1,4 +1,4 @@
-var REVISION = "4";
+var REVISION = "5";
 
 (function () {
 
@@ -73,8 +73,6 @@ var REVISION = "4";
 
 	function welcomePage() {
 		// Transition loading screen -> welcome page
-
-		console.log("Assets loaded successfully");
 
 		$("#welcome-join").bind("click touchstart", joinGame);
 
