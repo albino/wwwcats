@@ -13,6 +13,9 @@ div#loading, div#welcome {
 div#welcome > p {
 	margin-bottom: 10px;
 }
+div#welcome > table {
+	max-width: 800px;
+}
 td.welcome-pane {
 	padding: 20px;
 	height: 300px;
@@ -23,6 +26,11 @@ td.welcome-pane > h1 {
 }
 table#login-form {
 	margin-bottom: 10px;
+}
+tr#privacy {
+	font-size: 10px;
+	text-decoration: italic;
+	color: #333;
 }
 
 iframe#changelog {
