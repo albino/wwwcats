@@ -1,4 +1,4 @@
-var REVISION = "2";
+var REVISION = "3";
 
 (function () {
 
@@ -9,6 +9,14 @@ var REVISION = "2";
 
 	$( document ).ready(function () {
 		// Set up the game
+
+		// Create the changelog iframe
+		// We use this roundabout method to make sure the changelog is always
+		// re-downloaded every time REVISION changes
+		var changelog = document.createElement("iframe");
+		changelog.setAttribute("src", "changelog.html?rev="+REVISION);
+		changelog.id = "changelog";
+		document.getElementById("changelog-container").appendChild(changelog);
 		
 		// Load assets
 		// TODO: audio assets
