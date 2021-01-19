@@ -96,6 +96,10 @@ func (c *Client) joinToLobby(lobby_name string, player_name string, lobbies map[
 func (l *Lobby) readFromClient(c *Client, msg string) {
 	fields := strings.Fields(msg)
 
+	if len(fields) < 1 {
+		return
+	}
+
 	// Lobby-wide commands
 
 	if fields[0] == "chat" {
