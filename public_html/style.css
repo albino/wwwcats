@@ -41,6 +41,10 @@ body.changelog {
 }
 p.changelog-entry {
 	line-height: 1.6;
+	margin-bottom: 1em;
+}
+p.changelog-entry:last-of-type {
+	margin-bottom: 0;
 }
 
 div#game-view {
@@ -235,6 +239,47 @@ div#card-hud-3 > img.card {
 }
 div#card-hud-3 > img.card:last-child {
 	margin-right: 0;
+}
+
+div#modal-hud {
+	z-index: 1;
+	background-color: rgba(0, 0, 0, 0.5);
+	opacity: 0;
+	transition: 0.5s opacity;
+	height: 600px;
+	padding-top: 200px;
+	width: 800px;
+	position: absolute;
+}
+div#modal {
+	background-color: white;
+	color: #333;
+	width: 360px;
+	height: 360px;
+	overflow: auto;
+	margin-left: auto;
+	margin-right: auto;
+	border: 2px solid #777;
+	padding: 20px;
+	border-radius: 10px;
+}
+ul#modal-options {
+	margin-top: 10px;
+	padding-left: 0;
+}
+ul#modal-options li {
+	list-style: none;
+	padding: 10px;
+	background-color: #a8d9ff;
+	margin-left: auto;
+	margin-right: auto;
+	width: 200px;
+	border: 2px solid #0090ff;
+	margin-bottom: 10px;
+	cursor: pointer;
+}
+ul#modal-options li:hover {
+	background-color: #45aeff;
 }
 
 div#buttons-container {

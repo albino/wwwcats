@@ -449,12 +449,16 @@ var GameState = function() {
 				let perpetrator = entities(parts[2]);
 				this.console("<span style='color:deepskyblue'>" + perpetrator +
 					" is asking you for a favour.</span>");
-				return;
+			} else if (parts[1] == "favour_who" || parts[1] == "random_who" || parts[1] == "steal_who") {
+				(function (gameState) {
+					modalChoice(function(player) {
+						gameState.send("a "+parts[1]+" "+player);
+					}, strings["question_"+parts[1]], gameState.players, entities(gameState.name), null);
+				})(this);
+			} else {
+				ans = prompt(strings["question_"+parts[1]]);
+				this.send("a "+parts[1]+" "+ans);
 			}
-
-			// TODO: nicer GUI for this
-			ans = prompt(strings["question_"+parts[1]]);
-			this.send("a "+parts[1]+" "+ans);
 
 			return;
 		}

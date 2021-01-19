@@ -30,9 +30,9 @@ var strings = {
 	"bcast_high_players": "<span style='color:orange'>You are playing with 6 players - the game will still work, but be aware that this is more than intended!</span>",
 	"must_defuse": "<span style='color:purple'>You must defuse the Detonating Cat.</span>",
 	"question_defuse_pos": "Where should the Detonating Cat be placed in the deck? (0 = on top)",
-	"question_favour_who": "Who do you want to ask for a favour? (case-sensitive, I'm still working on a better interface for this, sorry)",
-	"question_random_who": "Who would you like to ask for a random card? (case-sensitive, I'm still working on a better interface for this, sorry)",
-	"question_steal_who": "Who would you like to steal a card from? (case-sensitive, I'm still working on a better interface for this, sorry)",
+	"question_favour_who": "Who do you want to ask for a favour?",
+	"question_random_who": "Who would you like to ask for a random card?",
+	"question_steal_who": "Who would you like to steal a card from?",
 	"question_steal_what": "Which card would you like to steal? (all lowercase, I'm still working on a better interface for this, sorry)",
 	"conn_closed": "The connection to the server was lost.",
 	"bad_version": "The game server is running a different version of the game. If this problem persists, please try hard-reloading the page by pressing Ctrl+F5 or clearing your browser cache."

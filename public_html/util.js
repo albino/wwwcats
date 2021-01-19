@@ -71,3 +71,39 @@ function cardHUD3(cards, time) {
 		}, 500);
 	}, time);
 }
+
+function modalChoice(cb, question, options, exclude, transform) {
+	// NO anti-xss
+
+	$("#modal-text").html(question);
+
+	options.forEach(function (opt) {
+		if (opt === exclude) {
+			return;
+		}
+
+		let button = document.createElement("LI");
+
+		if (transform) {
+			button.innerHTML = transform(opt);
+		} else {
+			button.innerHTML = opt;
+		}
+
+		button.addEventListener("click", function() {
+			cb(opt);
+
+			$("#modal-hud").css("opacity", "0");
+			setTimeout(function() {
+				$("#modal-options").empty();
+				$("#modal-hud").addClass("reveal");
+			}, 500);
+		}, false);
+		document.getElementById("modal-options").appendChild(button);
+	});
+
+	$("#modal-hud").removeClass("reveal");
+	setTimeout(function() {
+		$("#modal-hud").css("opacity", "1");
+	}, 100);
+}
