@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -100,6 +101,9 @@ func (c *Client) writePump() {
 		ticker.Stop()
 		c.conn.Close()
 	}()
+
+	// Send the server version on connect
+	c.sendMsg("version "+strconv.Itoa(REVISION))
 
 	for {
 		select {

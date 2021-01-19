@@ -142,6 +142,12 @@ var GameState = function() {
 			this.conn = null;
 			return;
 		}
+		if (parts[0] == "version" && parts[1] != REVISION) {
+			alert(strings["bad_version"]);
+			this.conn.close();
+			this.conn = null;
+			return;
+		}
 
 		if (parts[0] == "joins" && parts[1] == this.name) {
 			// We're in!

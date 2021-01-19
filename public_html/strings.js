@@ -34,5 +34,6 @@ var strings = {
 	"question_random_who": "Who would you like to ask for a random card? (case-sensitive, I'm still working on a better interface for this, sorry)",
 	"question_steal_who": "Who would you like to steal a card from? (case-sensitive, I'm still working on a better interface for this, sorry)",
 	"question_steal_what": "Which card would you like to steal? (all lowercase, I'm still working on a better interface for this, sorry)",
-	"conn_closed": "The connection to the server was lost."
+	"conn_closed": "The connection to the server was lost.",
+	"bad_version": "The game server is running a different version of the game. If this problem persists, please try hard-reloading the page by pressing Ctrl+F5 or clearing your browser cache."
 };

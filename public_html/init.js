@@ -1,3 +1,5 @@
+var REVISION = "1";
+
 (function () {
 
 	// Everything that runs as soon as the page loads; sets up the page and handles the
