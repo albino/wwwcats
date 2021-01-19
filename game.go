@@ -267,6 +267,7 @@ func (g *Game) readFromClient(c *Client, msg string) {
 		}
 
 		if g.currentPlayer >= len(g.players) {
+			log.Println("Player out of range")
 			break
 		}
 
@@ -297,6 +298,7 @@ func (g *Game) readFromClient(c *Client, msg string) {
 		}
 
 		if g.currentPlayer >= len(g.players) {
+			log.Println("Player out of range")
 			break
 		}
 
