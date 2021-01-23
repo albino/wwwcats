@@ -306,7 +306,6 @@ func (g *Game) readFromClient(c *Client, msg string) {
 		if g.favouring != nil {
 			// There is a case where it would be legal to play
 			// NOPE here - TODO
-			log.Println("Favouring")
 			break
 		}
 
@@ -645,13 +644,12 @@ func (g *Game) answersQuestion(player *Client, question string, answer string) {
 
 		if g.playerNumber(g.favoured) == -1 {
 			// The player being asked has left :(
-			player.sendMsg("q " + question)
+			player.sendMsg("q steal_who")
 			break
 		}
 
 		if !g.hands[g.favoured].contains(answer) {
 			g.lobby.sendBcast("steal_n "+g.favouring.name+" "+g.favoured.name+" "+answer)
-			break
 		} else {
 			g.hands[g.favoured].removeByName(answer)
 			g.favoured.sendMsg("hand" + g.hands[g.favoured].cardList())
