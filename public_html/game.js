@@ -324,7 +324,8 @@ var GameState = function() {
 						}
 
 						if ((gameState.ourTurn || cardName === "nope") && !cardName.startsWith("random")
-								&& (cardName !== "defuse" || gameState.defusing)) {
+								&& ( (!gameState.defusing && cardName !== "defuse")
+								||    (gameState.defusing && cardName === "defuse") )) {
 							gameState.send("play "+cardNo.toString());
 							gameState.defusing = false;
 						}
