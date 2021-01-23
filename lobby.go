@@ -1,7 +1,10 @@
 package main
 
 import (
+	"log"
 	"strings"
+
+	"runtime/debug"
 )
 
 type Lobby struct {
@@ -33,6 +36,22 @@ func newLobby(name string) (lobby *Lobby) {
 func (l *Lobby) run(lobbies map[string]*Lobby) {
 	// Goroutine to deal with all the tasks of the lobby
 
+	defer func() {
+		if r := recover(); r != nil {
+			// Recover a panicking lobby to avoid crashing the whole server
+			for client := range l.clients {
+				client.conn.Close()
+				delete(l.clients, client)
+				close(client.send)
+			}
+
+			delete(lobbies, l.name)
+
+			log.Printf("!!! PANIC in lobby %s: %v !!!", l.name, r)
+			debug.PrintStack()
+		}
+	}()
+
 	for {
 		select {
 
@@ -48,8 +67,9 @@ func (l *Lobby) run(lobbies map[string]*Lobby) {
 			l.currentGame.removePlayer(client)
 
 			if _, ok := l.clients[client]; ok {
-				delete(l.clients, client)
+				log.Printf("DELETING %s", client.name)
 				close(client.send)
+				delete(l.clients, client)
 			}
 
 			if len(l.clients) == 0 {

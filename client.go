@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"runtime/debug"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -44,6 +46,10 @@ func (c *Client) readPump(lobbies map[string]*Lobby) {
 		c.conn.Close()
 		if c.lobby != nil {
 			c.lobby.unregister <- c
+		}
+
+		if r := recover(); r != nil {
+			c.dieGracefully(r)
 		}
 	}()
 
@@ -107,6 +113,10 @@ func (c *Client) writePump() {
 	defer func() {
 		ticker.Stop()
 		c.conn.Close()
+
+		if r := recover(); r != nil {
+			c.dieGracefully(r)
+		}
 	}()
 
 	// Send the server version on connect
@@ -165,4 +175,10 @@ func (c *Client) sendMsg(message string) {
 	default:
 		log.Fatal("Failed to write to client", c.name)
 	}
+}
+
+func (c *Client) dieGracefully(r interface {}) {
+	// Terminates a panicking client to avoid crashing the server
+	log.Printf("!!! PANIC in client %s: %v !!!", c.name, r)
+	debug.PrintStack()
 }
