@@ -49,8 +49,11 @@ func newGame(lobby *Lobby) *Game {
 }
 
 func (g *Game) addPlayer(client *Client) {
+	// Adds a player to the spectators
+	// /!\ This function expects the caller to have already obtained a lock on
+	// g.lobby.clients - not doing this leads to a race condition
 	g.spectators[client] = true
-	g.lobby.sendBcast("joins " + client.name)
+	g.lobby.sendBcastRaw("joins " + client.name)
 	g.netburst(client)
 }
 
@@ -164,6 +167,9 @@ func (g *Game) wins(winner *Client) {
 	g.lobby.sendBcast("draw_pile no")
 	g.lobby.sendBcast("no_discard")
 	g.lobby.sendBcast("bcast new_game")
+
+	g.lobby.clientsMu.Lock()
+	defer g.lobby.clientsMu.Unlock()
 
 	g.lobby.currentGame = newGame(g.lobby)
 	for client := range g.lobby.clients {

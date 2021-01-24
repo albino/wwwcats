@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"strings"
+	"sync"
 
 	"runtime/debug"
 )
@@ -11,7 +12,16 @@ type Lobby struct {
 	name string
 
 	// Client management
+
+	// We need a lock for clients, because although the map is never written concurrently,
+	// it can be updated while a send operation is taking place, resulting in a race
+	// condition -> send on closed channel
+	// The reason for doing all this is so that we can make synchronous writes to the send
+	// channel of clients, in order to send events in the order they occur.
+	// Therefore: need to gain a lock when changing OR sending to clients!
+
 	clients    map[*Client]bool
+	clientsMu  sync.Mutex
 	register   chan *Client
 	unregister chan *Client
 
@@ -40,9 +50,7 @@ func (l *Lobby) run(lobbies map[string]*Lobby) {
 		if r := recover(); r != nil {
 			// Recover a panicking lobby to avoid crashing the whole server
 			for client := range l.clients {
-				client.conn.Close()
-				delete(l.clients, client)
-				close(client.send)
+				l.destroyClient(client)
 			}
 
 			delete(lobbies, l.name)
@@ -59,7 +67,9 @@ func (l *Lobby) run(lobbies map[string]*Lobby) {
 			l.clients[client] = true
 
 			// Sync the join to the game object
+			l.clientsMu.Lock()
 			l.currentGame.addPlayer(client)
+			l.clientsMu.Unlock()
 
 		case client := <-l.unregister:
 			// Announce and sync
@@ -67,9 +77,7 @@ func (l *Lobby) run(lobbies map[string]*Lobby) {
 			l.currentGame.removePlayer(client)
 
 			if _, ok := l.clients[client]; ok {
-				log.Printf("DELETING %s", client.name)
-				close(client.send)
-				delete(l.clients, client)
+				l.destroyClient(client)
 			}
 
 			if len(l.clients) == 0 {
@@ -132,12 +140,22 @@ func (l *Lobby) readFromClient(c *Client, msg string) {
 }
 
 func (l *Lobby) sendBcast(msg string) {
+	l.clientsMu.Lock()
+	defer l.clientsMu.Unlock()
+
+	l.sendBcastRaw(msg)
+}
+
+func (l *Lobby) sendBcastRaw(msg string) {
 	for client := range l.clients {
 		client.sendMsg(msg)
 	}
 }
 
 func (l *Lobby) sendComplexBcast(text string, except map[*Client]bool) {
+	l.clientsMu.Lock()
+	defer l.clientsMu.Unlock()
+
 	for client := range l.clients {
 		_, ok := except[client]
 		if ok {
@@ -146,4 +164,14 @@ func (l *Lobby) sendComplexBcast(text string, except map[*Client]bool) {
 
 		client.sendMsg(text)
 	}
+}
+
+func (l *Lobby) destroyClient(client *Client) {
+	l.clientsMu.Lock()
+	defer l.clientsMu.Unlock()
+
+	client.conn.Close()
+	delete(l.clients, client)
+	close(client.send)
+	log.Printf("DELETING %s", client.name)
 }
