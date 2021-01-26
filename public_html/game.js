@@ -20,10 +20,10 @@ var GameState = function() {
 
 	// Assets
 
-	this.images = [];
+	this.assets = {};
 
-	this.loadImage = function(img) {
-		this.images.push(img);
+	this.loadAsset = function(url, el) {
+		this.assets[url] = el;
 	}
 
 	this.resetButtons = function() {
@@ -103,6 +103,19 @@ var GameState = function() {
 		(function(gameState) {
 			$("#sort-button").on("click", function() {
 				gameState.send("sort");
+			});
+		})(this);
+
+		// Mute button
+		(function(gameState) {
+			$("#mute-button").on("click", function() {
+				if (gameState.assets["atomic.ogg"].muted) {
+					gameState.assets["atomic.ogg"].muted = false;
+					$("#mute-button").text("Mute sound");
+				} else {
+					gameState.assets["atomic.ogg"].muted = true;
+					$("#mute-button").text("Unmute sound");
+				}
 			});
 		})(this);
 
@@ -362,8 +375,11 @@ var GameState = function() {
 			// cmp with raw data because name isn't stored encoded
 			if (parts[1] == this.name) {
 				this.ourTurn = true;
+				this.assets["atomic.ogg"].play();
+				document.title = strings["title_alert"];
 			} else {
 				this.ourTurn = false;
+				document.title = strings["title_normal"]; // a bit fragile, needs to be same as <title>
 			}
 
 			return;

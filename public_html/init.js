@@ -1,4 +1,4 @@
-var REVISION = "8";
+var REVISION = "9";
 
 (function () {
 
@@ -29,8 +29,7 @@ var REVISION = "8";
 		document.getElementById("changelog-container").appendChild(changelog);
 		
 		// Load assets
-		// TODO: audio assets
-		var imageAssets = [
+		var assets = [
 			"wood.jpg",
 			"card_back.png",
 			"card_defuse.png",
@@ -45,25 +44,37 @@ var REVISION = "8";
 			"card_random2.png",
 			"card_random3.png",
 			"card_random4.png",
-			"card_random5.png"
+			"card_random5.png",
+			"atomic.ogg"
 		];
 		var promises = [];
 		var assetsLoaded = 0;
 
-		for (var i = 0; i < imageAssets.length; i++) {
+		for (var i = 0; i < assets.length; i++) {
 			(function(url, promise) {
-				var img =  new Image();
-				img.onload = function() {
+				let ext = url.split(".").pop();
+				var el;
+				if (ext == "jpg" || ext == "png") {
+					el = new Image();
+				} else {
+					el = new Audio();
+				}
+
+				el.onload = function() {
 					// Increment the loading counter to convince the user we're doing something
 					assetsLoaded += 1;
 					document.getElementById("loading-assets").innerHTML = assetsLoaded;
 
 					promise.resolve();
 				};
-				img.src = "assets/"+url;
+				if (ext == "ogg") {
+					el.oncanplaythrough = el.onload;
+				}
 
-				gameState.loadImage(img);
-			})(imageAssets[i], promises[i] = $.Deferred());
+				el.src = "assets/"+url;
+
+				gameState.loadAsset(url, el);
+			})(assets[i], promises[i] = $.Deferred());
 		}
 
 		// Once all the promises have resolved (all assets loaded), call the function to 

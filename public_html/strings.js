@@ -35,7 +35,9 @@ var strings = {
 	"question_steal_who": "Who would you like to steal a card from?",
 	"question_steal_what": "Which card would you like to steal?",
 	"conn_closed": "The connection to the server was lost.",
-	"bad_version": "The game server is running a different version of the game. If this problem persists, please try hard-reloading the page by pressing Ctrl+F5 or clearing your browser cache."
+	"bad_version": "The game server is running a different version of the game. If this problem persists, please try hard-reloading the page by pressing Ctrl+F5 or clearing your browser cache.",
+	"title_normal": "Detonating Cats",
+	"title_alert": "* YOUR TURN! * (Detonating Cats)"
 };
 
 var cards = [
