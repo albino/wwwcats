@@ -725,7 +725,8 @@ func (g *Game) start() {
 
 	// Give each player a hand
 	for _, player := range g.players {
-		g.hands[player] = g.deck.dealHand()
+		// Pass the number of players so the deal method knows how many cards to deal
+		g.hands[player] = g.deck.dealHand(len(g.players))
 	}
 
 	// Shuffle in extra cards

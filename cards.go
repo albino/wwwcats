@@ -101,12 +101,19 @@ func (d *Deck) shuffle() {
 	})
 }
 
-func (d *Deck) dealHand() (h *Hand) {
+func (d *Deck) dealHand(playerCount int) (h *Hand) {
 	h = new(Hand)
 
 	h.cards = []string{"defuse"}
 
-	for i := 0; i < 7; i++ {
+	var cardCount int
+	if playerCount > 5 {
+		cardCount = 6
+	} else {
+		cardCount = 7
+	}
+
+	for i := 0; i < cardCount; i++ {
 		h.cards = append(h.cards, d.draw())
 	}
 
