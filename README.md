@@ -40,6 +40,8 @@ Just run the `wwwcats` binary to start the server, and `./wwwcats -h` for help w
 
 ## License
 
+Copyright (C) 2021 Lawrence Brown.
+
 "Exploding Kittens" is a trademark of Exploding Kittens Inc.
 
 The program's source code is released under the terms of the GNU Affero General Public License (version 3).
